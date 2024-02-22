@@ -140,7 +140,7 @@ function drawDesktop()
       end
     elseif i == 1 then
       local totalPower, totalMaxPower = getTotal()
-      powerBar( "Gesamt", titleHeight + 1, panelWidth - 6, totalPower, totalMaxPower, 0x00bb00, true, "RF", panelWidth*i+2)
+      powerBar( "Gesamt", titleHeight + 2, panelWidth - 6, totalPower, totalMaxPower, 0x00bb00, true, "RF", panelWidth*i+2)
     end
 
   end
