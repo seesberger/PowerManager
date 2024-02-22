@@ -1,0 +1,1 @@
+os.execute("gitrepo seesberger/PowerManager /home/PowerManager")
