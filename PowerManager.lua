@@ -7,6 +7,8 @@ local event = require( "event" )
 local oldW, oldH = gpu.getResolution()
 local newW = 160
 local newH = 50
+local numberOfPanels = 2
+local panelWidth = (newW / numberOfPanels)
 gpu.setResolution(newW, newH)
  
 function clearScreen()
@@ -111,7 +113,6 @@ function getTotal()
 end
 
 function drawDesktop()
-  local halfWidth = newW / 2
   drawLine(halfWidth, 3, 1, 40, 0xffffff)
   drawLine(1, 43, newW, 1, 0xffffff)
   gpu.set(1, 42, "Speicherzellen")
