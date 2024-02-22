@@ -3,10 +3,11 @@ print("Updaten? (Y/*)")
 local abfrage = io.read()
 
 if abfrage == "Y" then
-    print("Ja!")
+    print("Update und Installationsprogramm werden abgerufen...")
     os.execute("gitrepo seesberger/PowerManager /home/PowerManager")
+    dofile("/home/installer.lua")
 else
-    print("Nein!")
+    print("Ohne Update fortfahren...")
     os.sleep(1)
 end
 

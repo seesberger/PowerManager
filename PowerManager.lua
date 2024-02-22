@@ -110,6 +110,15 @@ function getTotal()
 
 end
 
+function drawDesktop()
+  local halfWidth = newW / 2
+  drawLine(halfWidth, 3, 1, 40, 0xffffff)
+  drawLine(1, 43, newW, 1, 0xffffff)
+  gpu.set(1, 42, "Speicherzellen")
+  gpu.set(halfWidth + 1, 42, "Generatoren")
+  gpu.set((newW - #frameTitle) / 2, 1, frameTitle)
+end
+
 local splashText = "Supercoole Stromanzeige"
 local frameTitle = "Power Monitor - Klicken zum Beenden"
  
@@ -117,21 +126,13 @@ clearScreen()
 drawLine(1, 1, newW, 1, 0xbbbbbb)
 gpu.set((newW - #splashText) / 2, 24, splashText)
 os.sleep(1)
-
 clearScreen()
-gpu.set((newW - #frameTitle) / 2, 1, frameTitle)
 local cellsID = getCells()
 
 while true do
   local _,_,x,y = event.pull( 1, "touch" )
   local count = 0   
   if x and y then goto quit end
-  
-  local halfWidth = newW / 2
-  drawLine(halfWidth, 3, 1, 40, 0xffffff)
-  drawLine(1, 43, newW, 1, 0xffffff)
-  gpu.set(1, 42, "Speicherzellen")
-  gpu.set(halfWidth + 1, 42, "Generatoren")
   
   for address, name in pairs(cellsID) do
     local cell = component.proxy( address )
@@ -148,3 +149,4 @@ end
 ::quit::
 gpu.setResolution( oldW, oldH )
 clearScreen()
+print("Programm beendet.")

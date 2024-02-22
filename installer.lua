@@ -1,4 +1,3 @@
-local greetingText =    "Dieser Installer begleitet Sie für wenige Sekunden bei der Installation eines sehr coolen Programmes. Bitte tun Sie, was das Programm sagt, sonst wird es sauer."
 local headerText = "PowerManager - Installer\n"
 local startOnBootText = "Beim Boot ausführen?"
 local automaticUpdateText = "Automatisch updates herunterladen?"
@@ -7,17 +6,18 @@ local automaticUpdateText = "Automatisch updates herunterladen?"
 local function askThatDamnUser(prompt)
     while true do
         print(">>> " .. prompt)
-        local userInput = term.read()
+        local userInput = io.read()
 
-        if userInput == "Y\n" then
+        if userInput == "Y" then
             return true
-        elseif userInput == "N\n" then
+        elseif userInput == "N" then
             return false
         else
             print("Hallo? => ( Y / N ) Nicht -> " .. userInput)
         end
     end
 end
+
 
 local startOnBoot = askThatDamnUser(startOnBootText)
 local automaticUpdate = askThatDamnUser(automaticUpdateText)
