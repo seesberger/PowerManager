@@ -3,6 +3,9 @@
 local component = require( "component" )
 local gpu = component.gpu
 local event = require( "event" )
+
+local splashText = "Stromanzeige - Ultimate ROG RGB LED Edition"
+local frameTitle = "Power Monitor - Klicken zum Beenden"
  
 local oldW, oldH = gpu.getResolution()
 local newW = 160
@@ -24,9 +27,8 @@ function drawLine(startX, startY, stopX, stopY, colorOfLine)
   gpu.setBackground(oldColor, false)
 end 
  
-function powerBar( label, y, x, value, maxVal, colorOfBar, show, unit )
+function powerBar( label, y, x, value, maxVal, colorOfBar, show, unit, border)
   local oldColor = gpu.getBackground(false)
-  local border = 3
   local borderSymbol = " "
   local barSymbol = " "
   local percentage = (value * 100 / maxVal)
@@ -112,38 +114,54 @@ function getTotal()
 
 end
 
-function drawDesktop()
-  drawLine(halfWidth, 3, 1, 40, 0xffffff)
-  drawLine(1, 43, newW, 1, 0xffffff)
-  gpu.set(1, 42, "Speicherzellen")
-  gpu.set(halfWidth + 1, 42, "Generatoren")
-  gpu.set((newW - #frameTitle) / 2, 1, frameTitle)
+function drawPanel(x, y, width, height, color)
+  drawLine(x, y, width, height, color)
+  drawLine(x + 1, y + 1, width -1, height - 1, 0x000000)
 end
 
-local splashText = "Supercoole Stromanzeige"
-local frameTitle = "Power Monitor - Klicken zum Beenden"
+function drawDesktop()
+  --Title
+  local titleHeight = 3
+  drawPanel(1, 1, newW, titleHeight, 0xffffff)
+  gpu.set((newW - #frameTitle) / 2, 2, frameTitle)
+  local cellsID = getCells()
+  local count = 0   
+  local t = titleHeight
+
+  for i = 0,numberOfPanels - 1,+1 do 
+    drawPanel(panelWidth*i+1, titleHeight + 1, newH - titleHeight)
+    if i == 0 then
+      for address, name in pairs(cellsID) do
+        local cell = component.proxy( address )
+        count = count + 1
+        t = t + 3
+        powerBar( name, t , panelWidth - 6, cell.getEnergyStored(), cell.getMaxEnergyStored() , 0x00bb00, true, "RF", panelWidth*i+2)
+      end
+    elseif i == 1 then
+      local totalPower, totalMaxPower = getTotal()
+      powerBar( "Gesamt", titleHeight + 1, panelWidth - 6, totalPower, totalMaxPower, 0x00bb00, true, "RF", panelWidth*i+2)
+    end
+
+  end
+end
+
  
 clearScreen()
 drawLine(1, 1, newW, 1, 0xbbbbbb)
 gpu.set((newW - #splashText) / 2, 24, splashText)
 os.sleep(1)
 clearScreen()
-local cellsID = getCells()
 
 while true do
   local _,_,x,y = event.pull( 1, "touch" )
-  local count = 0   
-  if x and y then goto quit end
-  
-  for address, name in pairs(cellsID) do
-    local cell = component.proxy( address )
-    count = count + 1
-    local t = count * 3
-    powerBar( name, t , halfWidth - 6, cell.getEnergyStored(), cell.getMaxEnergyStored() , 0x00bb00, true, "RF" )
+  drawDesktop()
+  if x < 10 and y < 10 then
+    numberOfPanels = numberOfPanels + 1
+  elseif x > 10 and Y > 10 then
+    numberOfPanels = numberOfPanels - 1
+  else
+    goto quit
   end
-
-  local totalPower, totalMaxPower = getTotal()
-  powerBar( "Gesamt", 51 - count, newW - 6, totalPower, totalMaxPower, 0x00bb00, true, "RF" )
 end
  
  
