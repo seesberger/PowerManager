@@ -128,7 +128,8 @@ function drawDesktop()
   local count = 0   
   local t = titleHeight
 
-  for i = numberOfPanels - 1, 0, -1 do 
+  for i = numberOfPanels - 1, 0, -1 
+  do 
     drawPanel(panelWidth*i+1, titleHeight + 1, newH - titleHeight, 0xffffff)
     if i == 0 then
       for address, name in pairs(cellsID) do
