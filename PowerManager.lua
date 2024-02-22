@@ -154,13 +154,12 @@ os.sleep(1)
 clearScreen()
 
 while true do
-  local _,_,x,y = event.pull( 1, "touch" )
   drawDesktop()
-  if x < 10 and y < 10 then
-    numberOfPanels = numberOfPanels + 1
-  elseif x > 10 and Y > 10 then
-    numberOfPanels = numberOfPanels - 1
-  else
+  local id, _, x, y = event.pullMultiple("touch", "interrupted")
+  if id == "interrupted" then
+    print("soft interrupt, closing")
+    goto quit
+  elseif id == "touch" then
     goto quit
   end
 end
