@@ -130,7 +130,7 @@ function drawDesktop()
 
   for i = numberOfPanels - 1, 0, -1 
   do 
-    drawPanel(panelWidth*i+1, titleHeight + 1, newH - titleHeight, 0xffffff)
+    drawPanel(panelWidth*i+1, titleHeight + 1, panelWidth, newH - titleHeight, 0xffffff)
     if i == 0 then
       for address, name in pairs(cellsID) do
         local cell = component.proxy( address )
