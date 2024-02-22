@@ -21,7 +21,6 @@ function drawLine(startX, startY, stopX, stopY, colorOfLine)
   gpu.fill(startX, startY, stopX, stopY, " ")
   gpu.setBackground(oldColor, false)
 end 
-
  
 function powerBar( label, y, x, value, maxVal, colorOfBar, show, unit )
   local oldColor = gpu.getBackground(false)
