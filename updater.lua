@@ -1,10 +1,10 @@
 
 print("Updaten? (Y/*)")
-local abfrage = term.read()
+local abfrage = io.read()
 
-if abfrage == "Y" then
+if abfrage == "Y\n" then
     print("Ja!")
-    --os.execute("gitrepo seesberger/PowerManager /home/PowerManager")
+    os.execute("gitrepo seesberger/PowerManager /home/PowerManager")
 else
     print("Nein!")
     os.sleep(1)
