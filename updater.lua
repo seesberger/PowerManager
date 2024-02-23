@@ -213,13 +213,13 @@ if #args<1 then
     return
 end
 
-if args == "-h" then
+if args[1] == "-h" then
     print(helpText)
     return
-elseif args == "-a" then
+elseif args[1] == "-a" then
     automaticUpdate()
     return
-elseif args == "-i" then
+elseif args[1] == "-i" then
     automaticUpdate()
     automaticInstall()
     return
