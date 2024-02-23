@@ -1,2 +1,2 @@
-dofile("/home/PowerManager/updater.lua")
-dofile("/home/PowerManager/PowerManager.lua")
+dofile("/usr/PowerManager/updater.lua")
+dofile("/usr/PowerManager/PowerManager.lua")

@@ -1,3 +1,4 @@
+local args = {...}
 local headerText = "PowerManager - Installer\n"
 local startOnBootText = "Beim Boot ausführen?"
 local automaticUpdateText = "Automatisch updates herunterladen?"
