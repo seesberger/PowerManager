@@ -1,7 +1,7 @@
 local args = {...}
 local helpText = "This is a tool for displaying and managing your Power cells and generators.\n"..
-                 "Usages:"..
-                 "powerman <option> - no args: starts the application"..
+                 "Usages:\n"..
+                 "powerman <option> - no args: starts the application\n"..
                  "   ''       -h    - this help text\n" .. 
                  "   ''     update <update argument>"
 

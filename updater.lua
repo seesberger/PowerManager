@@ -8,9 +8,11 @@ local event=require("event")
 local keyboard=require("keyboard")
 
 local repository = "seesberger/PowerManager"
-local targetFilepath = "/usr/PowerManager/"
+local repoTargetPath = "/usr/PowerManager/"
+local libTargetPath = "/lib/"
 
-local helpText =        "Usage:\n" .. 
+local helpText =        "This updater pulls the git files for installation and application updates.\n"..
+                        "Usage:\n" .. 
                         "updater <option> - no args: manual update and install\n"..
                         "  ''       -h    - this help text\n" .. 
                         "  ''       -a    - automatic update no install\n" .. 
@@ -18,22 +20,30 @@ local helpText =        "Usage:\n" ..
 
 function manualUpdate()
     print("Manual repo pull...")
-    downloadRepo(repository, targetFilepath, false)
+    downloadRepo(repository, repoTargetPath, false)
 end
 
 function manualInstall()
     print("installing shortcut...")
-    os.execute("mv shortcut.lua /usr/bin/powerman.lua")
+    os.execute("mv "..repoTargetPath.."shortcut.lua /usr/bin/powerman.lua")
 end
 
 function automaticUpdate()
     print("Auto repo pull...")
-    downloadRepo(repository, targetFilepath, true)
+    downloadRepo(repository, repoTargetPath, true)
 end
 
 function automaticInstall()
-    print("Installing shortcut...")
-    os.execute("mv shortcut.lua /usr/bin/powerman.lua")
+    print("downloading GUI-API")
+    downloadDependencies()
+    manualInstall()
+end
+
+function downloadDependencies(automatic)
+    os.execute("wget -f https://github.com/kevinkk525/OC-GUI-API/raw/master/shapes_default.lua /lib/shapes_default.lua")
+    os.execute("wget -f https://github.com/kevinkk525/OC-GUI-API/raw/master/GUI.lua /lib/GUI.lua")
+    os.execute("wget -f https://github.com/kevinkk525/OC-GUI-API/raw/master/term_mod.lua /lib/term_mod.lua")
+    os.execute("wget -f https://github.com/kevinkk525/OC-GUI-API/raw/master/tech_demo.lua /home/GUI_tech_demo.lua")
 end
 
 function downloadRepo(repo, target, automatic)
