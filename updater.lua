@@ -142,7 +142,7 @@ function downloadRepo(repo, target, automatic)
     end
 
     local replaceMode="ask"
-    if auto == true then replaceMode = "always" end
+    if automatic == true then replaceMode = "always" end
     for i=1,#files do
         local replace=nil
         if filesystem.exists(target..files[i]) then
