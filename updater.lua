@@ -10,7 +10,11 @@ local keyboard=require("keyboard")
 local repository = "seesberger/PowerManager"
 local targetFilepath = "/usr/PowerManager/"
 
-local helpText =        "Usage:\n" .. "updater <nothing>  - manual update and install\n".."updater    -h      - this particular text\n" .. "  ''       -a      - automatic update no install\n" .. "  ''       -i      - automatic update and install"
+local helpText =        "Usage:\n" .. 
+                        "updater <option> - no args: manual update and install\n"..
+                        "  ''       -h    - this help text\n" .. 
+                        "  ''       -a    - automatic update no install\n" .. 
+                        "  ''       -i    - automatic update and install"
 
 function manualUpdate()
     print("Manual repo pull...")
