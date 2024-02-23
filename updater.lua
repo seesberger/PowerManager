@@ -17,7 +17,7 @@ function manualUpdate()
 end
 
 function manualInstall()
-    os.execute(targetFilepath.."installer.lua -m")
+    os.execute("mv shortcut.lua /usr/bin/powerman.lua")
 end
 
 function automaticUpdate()
@@ -25,10 +25,10 @@ function automaticUpdate()
 end
 
 function automaticInstall()
-    os.execute(targetFilepath.."installer.lua -a")
+    os.execute("mv shortcut.lua /usr/bin/powerman.lua")
 end
 
-function downloadRepo(repo, target, auto)
+function downloadRepo(repo, target, automatic)
 
     if not repo:match("^[%w-.]*/[%w-.]*$") then
         print('"'..repo..'" does not look like a valid repo identifier.\nShould be <owner>/<reponame>')
@@ -142,7 +142,7 @@ function downloadRepo(repo, target, auto)
     end
 
     local replaceMode="ask"
-    if auto then replacemode = "always" end
+    if auto == true then replaceMode = "always" end
     for i=1,#files do
         local replace=nil
         if filesystem.exists(target..files[i]) then
