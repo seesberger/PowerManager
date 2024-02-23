@@ -11,10 +11,9 @@ if args[1] == "-h" then
     print(helpText)
     return
 elseif args[1] == "update" then
-    dofile("/usr/PowerManager/updater.lua")
+    os.execute("/usr/PowerManager/updater.lua -a")
     return
 else
     print('"'..args[1]..'" - Bad argument. you can use: powerman update')
-    print(helpText)
     return
 end
