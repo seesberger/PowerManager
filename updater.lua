@@ -214,6 +214,7 @@ end
 if #args<1 then
     print("No Arguments given. Manual process...")
     manualUpdate()
+    automaticInstall()
     return
 end
 

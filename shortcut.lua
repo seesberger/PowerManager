@@ -1,5 +1,6 @@
 local args = {...}
-local helpText = "This is a tool for displaying and managing your Power cells and generators."
+local helpText = "This is a tool for displaying and managing your Power cells and generators.\n"..
+                 "At the moment there only is an updater: type 'powerman update -h' for more info!"
 
 
 if #args<1 then
@@ -18,6 +19,6 @@ elseif args[1] == "update" then
     os.execute("/usr/PowerManager/updater.lua -a")
     return
 else
-    print('"'..args[1]..'" - Bad argument. you can use: powerman update <argument>')
+    print('"'..args[1]..'" - Bad argument. you can use: powerman -h')
     return
 end
