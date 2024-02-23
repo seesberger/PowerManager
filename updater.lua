@@ -10,33 +10,7 @@ local keyboard=require("keyboard")
 local repository = "seesberger/PowerManager"
 local targetFilepath = "/usr/PowerManager/"
 
-local helpText =        "Usage:\n" .. 
-                        "updater <nothing>  - manual update and install\n"..
-                        "updater    -h      - this particular text\n" .. 
-                        "  ''       -a      - automatic update no install\n" .. 
-                        "  ''       -i      - automatic update and install"
-
-if #args<1 then
-    print("No Arguments given. Manual process...")
-    manualUpdate()
-    return
-end
-
-if args == "-h" then
-    print(helpText)
-    return
-elseif args == "-a" then
-    automaticUpdate()
-    return
-elseif args == "-i" then
-    automaticUpdate()
-    automaticInstall()
-    return
-else
-    print('"'..args[1]..'" - Bad argument.')
-    print(helpText)
-    return
-end
+local helpText =        "Usage:\n" .. "updater <nothing>  - manual update and install\n".."updater    -h      - this particular text\n" .. "  ''       -a      - automatic update no install\n" .. "  ''       -i      - automatic update and install"
 
 function manualUpdate()
     downloadRepo(repository, targetFilepath, false)
@@ -57,8 +31,8 @@ end
 function downloadRepo(repo, target, auto)
 
     if not repo:match("^[%w-.]*/[%w-.]*$") then
-    print('"'..repo..'" does not look like a valid repo identifier.\nShould be <owner>/<reponame>')
-    return
+        print('"'..repo..'" does not look like a valid repo identifier.\nShould be <owner>/<reponame>')
+        return
     end
 
     target=target and ("/"..target:match("^/?(.-)/?$").."/") or "/tmp/"..repo
@@ -168,7 +142,7 @@ function downloadRepo(repo, target, auto)
     end
 
     local replaceMode="ask"
-    if auto then replacemode == "always" end
+    if auto then replacemode = "always" end
     for i=1,#files do
         local replace=nil
         if filesystem.exists(target..files[i]) then
@@ -231,5 +205,27 @@ function downloadRepo(repo, target, auto)
             end
         end
     end
+end
+
+if #args<1 then
+    print("No Arguments given. Manual process...")
+    manualUpdate()
+    return
+end
+
+if args == "-h" then
+    print(helpText)
+    return
+elseif args == "-a" then
+    automaticUpdate()
+    return
+elseif args == "-i" then
+    automaticUpdate()
+    automaticInstall()
+    return
+else
+    print('"'..args[1]..'" - Bad argument.')
+    print(helpText)
+    return
 end
 
