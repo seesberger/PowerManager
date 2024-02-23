@@ -13,18 +13,22 @@ local targetFilepath = "/usr/PowerManager/"
 local helpText =        "Usage:\n" .. "updater <nothing>  - manual update and install\n".."updater    -h      - this particular text\n" .. "  ''       -a      - automatic update no install\n" .. "  ''       -i      - automatic update and install"
 
 function manualUpdate()
+    print("Manual repo pull...")
     downloadRepo(repository, targetFilepath, false)
 end
 
 function manualInstall()
+    print("installing shortcut...")
     os.execute("mv shortcut.lua /usr/bin/powerman.lua")
 end
 
 function automaticUpdate()
+    print("Auto repo pull...")
     downloadRepo(repository, targetFilepath, true)
 end
 
 function automaticInstall()
+    print("Installing shortcut...")
     os.execute("mv shortcut.lua /usr/bin/powerman.lua")
 end
 
