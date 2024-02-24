@@ -226,7 +226,8 @@ local function printHelpText()
     local helpText =        "This updater pulls the git files for installation and application updates.\n"..
     "Usage:\n" ..
     "updater <option>  - no args: manual update and install\n"..
-    "  '' -h or --help - this help text"
+    "  '' -h or        - this help text"..
+    "  '' -d or        - install default config"
     print(helpText)
 end
 
@@ -235,10 +236,10 @@ local function run(cliArgs)
         print("No Arguments given. For help, please check -h or --help")
         return
     end
-    if cliArgs[1] == ("-h" or "--help") then
+    if cliArgs[1] == "-h" then
         printHelpText()
         return
-    elseif cliArgs[1] == ("--setup-default") then
+    elseif cliArgs[1] == "-d" then
         --- ask user about repo
         Repository = DefaultRepository
         if askYesOrNoQuestion("Use default config? (github::seesberger/PowerManager)?",YES,NO,true) then runFullInstallTask(Repository) end
