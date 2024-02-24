@@ -35,8 +35,8 @@ DefaultInstallationPath = "/usr/"
 
 local function askYesOrNoQuestion(question, expectedTrue, expectedFalse, defaultYesOnEnter)
     local function checkContains(array,value)
-        for idx, val in array do
-            if value == val then return true
+        for idx, val in pairs(array) do
+            if value == val then return true end
         end
         return false
     end
@@ -49,12 +49,11 @@ local function askYesOrNoQuestion(question, expectedTrue, expectedFalse, default
         if checkContains(expectedFalse, userInput) then return false end
         print("Please answer with yes or no. You can also press ENTER to choose the default option.")
     end
-    end
 end
 
 local function askTextQuestion(question, defaultAnswerOnEnter, allowOnly)
     local allowedInputsString = ""
-    for idx, entry in allowOnly do allowedInputsString = allowedInputsString..entry end
+    for idx, entry in pairs(allowOnly) do allowedInputsString = allowedInputsString..entry end
     if allowOnly then print(question.." ["..allowedInputsString.."]")
     else print(question) end
     local userInput = nil
@@ -62,14 +61,14 @@ local function askTextQuestion(question, defaultAnswerOnEnter, allowOnly)
     repeat
         userInput = io.read("l")
         if allowOnly then
-            for idx, entry in allowOnly do if entry == userInput then found = true end end
+            for idx, entry in pairs(allowOnly) do if entry == userInput then found = true end end
         else break end
     until found
     if userInput == "" then return defaultAnswerOnEnter else return userInput end
 end
 
 --- todo: pcall and catch errors
-local function downloadRepo(repository, autoOverride)
+local function downloadRepo(repository, remoteType, autoOverride)
 
     local function validateRepositoryIdentifier(repository)
         if not repository.RepoIdentifier:match("^[%w-.]*/[%w-.]*$") then
@@ -117,7 +116,7 @@ local function downloadRepo(repository, autoOverride)
                 if t[i].type=="dir" then
                 table.insert(directories,dir.."/"..t[i].name)
 
-                local subfiles,subdirs=fetchFilesAndSubdirs(repository.RepoIdentifier,dir.."/"..t[i].name)
+                local subfiles,subdirs=fetchFilesAndSubdirs(repository,SupportedRemotes.Github,dir.."/"..t[i].name)
                 for i=1,#subfiles do
                     table.insert(files,subfiles[i])
                 end
@@ -134,7 +133,7 @@ local function downloadRepo(repository, autoOverride)
     end
 
     --- fetch and make dirs in the target download path recursively
-    local files,dirs=fetchFilesAndSubdirs(repository.RepoIdentifier, "", SupportedRemotes.Github)
+    local files,dirs=fetchFilesAndSubdirs(repository.RepoIdentifier, remoteType, "")
     for i=1,#dirs do
         local success, err = pcall(makeDirIfNotExists, targetDownloadPath..dirs[i])
         if not success then error(("the download failed because of filesystem errors. %x"):format(err)) end
@@ -202,13 +201,11 @@ end
 
 --- todo: automatic read of dependency list (txt file containing lines with <link> <dst> or somethink like it)
 --- removeme
-local function legacyInstallDependencies(enabled)
-    if enabled==true then
-        os.execute("wget -f https://github.com/kevinkk525/OC-GUI-API/raw/master/shapes_default.lua /lib/shapes_default.lua")
-        os.execute("wget -f https://github.com/kevinkk525/OC-GUI-API/raw/master/GUI.lua /lib/GUI.lua")
-        os.execute("wget -f https://github.com/kevinkk525/OC-GUI-API/raw/master/term_mod.lua /lib/term_mod.lua")
-        os.execute("wget -f https://github.com/kevinkk525/OC-GUI-API/raw/master/tech_demo.lua /home/GUI_tech_demo.lua")
-    end
+local function legacyInstallDependencies()
+    os.execute("wget -f https://github.com/kevinkk525/OC-GUI-API/raw/master/shapes_default.lua /lib/shapes_default.lua")
+    os.execute("wget -f https://github.com/kevinkk525/OC-GUI-API/raw/master/GUI.lua /lib/GUI.lua")
+    os.execute("wget -f https://github.com/kevinkk525/OC-GUI-API/raw/master/term_mod.lua /lib/term_mod.lua")
+    os.execute("wget -f https://github.com/kevinkk525/OC-GUI-API/raw/master/tech_demo.lua /home/GUI_tech_demo.lua")
 end
 
 --- fix legacy shit
@@ -216,9 +213,9 @@ local function runFullInstallTask(repository)
     --- first, download the actual repo.
     --- then, find dependencies - if then exist, download and install them
     --- then, install the actual program
-    legacyInstallDependencies(true) --only for testing while new version not implemented yet
+    legacyInstallDependencies() --only for testing while new version not implemented yet
     print("downloading "..repository.RepoIdentifier)
-    downloadRepo(repository, false) --enable autooverwrite in other situations still todo
+    downloadRepo(repository, repository.Remote, false) --enable auto-overwrite in other situations still todo
     installShortcut(repository.CurrentLocalPath)
 end
 
@@ -226,7 +223,7 @@ local function printHelpText()
     local helpText =        "This updater pulls the git files for installation and application updates.\n"..
     "Usage:\n" ..
     "updater <option>  - no args: manual update and install\n"..
-    "  '' -h or        - this help text"..
+    "  '' -h or        - this help text\n"..
     "  '' -d or        - install default config"
     print(helpText)
 end
@@ -242,11 +239,9 @@ local function run(cliArgs)
     elseif cliArgs[1] == "-d" then
         --- ask user about repo
         Repository = DefaultRepository
-        if askYesOrNoQuestion("Use default config? (github::seesberger/PowerManager)?",YES,NO,true) then runFullInstallTask(Repository) end
-        return
+        if askYesOrNoQuestion("Use default config? (github::seesberger/PowerManager)?",YES,NO,true) == true then runFullInstallTask(DefaultRepository) end
     else
         print('"'..cliArgs[1]..'" - Bad argument. Try --help')
-        return
     print("Program exited.")
     end
 end
