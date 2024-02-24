@@ -74,7 +74,7 @@ local function downloadRepo(repository, remoteType, autoOverride)
         if not repository.RepoIdentifier:match("^[%w-.]*/[%w-.]*$") then
             print('"'..repository.RepoIdentifier..'" does not look like a valid repo identifier.\nShould be <owner>/<reponame>')
             return
-        end 
+        end
     end
 
     validateRepositoryIdentifier(repository)
