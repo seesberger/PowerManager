@@ -5,8 +5,6 @@ local helpText = "This is a tool for displaying and managing your Power cells an
                  "   ''       -h    - this help text\n" .. 
                  "   ''     update <update argument>"
 
-
-
 if #args<1 then
     dofile("/usr/PowerManager/main.lua")
     return

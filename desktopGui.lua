@@ -9,168 +9,228 @@ local gui=require"GUI"
 gui.initialize()
 local w,h = gui.getResolution()
 local start_time = computer.uptime()
-local clickcount = 0
 local running = true
 
-local function incCount()
-    clickcount=clickcount+1
-    click_counter.setText("Clickcounter: %i",clickcount)
-end
-
-local function moveR1() test1.move(1) end
-local function moveL1() test1.move(-1) end
-local function moveUp1() test1.move(nil,-1) end
-local function moveDown1() test1.move(nil,1) end
-local function layerUp1() test1.move(nil,nil,1) showl1.setText("Layer yellow: %i",test1.getLayer()) end
-local function layerDown1() test1.move(nil,nil,-1) showl1.setText("Layer yellow: %i",test1.getLayer()) end
-local function moveR2() test2.move(1) end
-local function moveL2() test2.move(-1) end
-local function moveUp2() test2.move(nil,-1) end
-local function moveDown2() test2.move(nil,1) end
-local function layerUp2() test2.move(nil,nil,1) showl2.setText("Layer blue:   %i",test2.getLayer()) end
-local function layerDown2() test2.move(nil,nil,-1) showl2.setText("Layer blue:   %i",test2.getLayer()) end
-local function exitGUI() running=false end
-local function chgFCol() gui.setStdForeColor(0xFF0000) end
-local function chgStdCol() gui.setStdForeColor(0xFFFFFF) end
-local function textoutput(x,y,button,user,text) textoutput_shape.setText(text) end
-
 gui.show()
---[[
-welcome=gui.label(math.floor(w/3),2,math.floor(w/3),4,nil,nil,nil,nil,nil,"Welcome to the tech demo of my GUI-API!\nI hope you enjoy it and get a taste of its potential,\nwell it is still beta..\ncould kill penguins, burn your house etc...:D")
-features=gui.labelbox(2,8,w-4,9,101,nil,0x00AAFF,nil,nil,"Some general features in beta:\nObject oriented, Layer support, Reference system\n\nSo in understandable words:\nYou can move objects, resize objects, change their layer, bind a text to a rect so they move and resize together,...\n\nCurrently added shapes:\nRect, Label, Labelbox, Listing, Textbox (working, but has some glitches)\nThe Community is encouraged to contribute shapes!")
-counter=gui.label(w-20,1,20,1,101,nil,nil,nil,nil,"Current uptime: %.1f",computer.uptime()-start_time)
-click_counter=gui.label(w-20,2,20,0,101,nil,nil,nil,nil,"Clickcounter: %i",clickcount)
-clickbox=gui.labelbox(w/2-5,20,10,2,101,nil,0xFFAA00,incCount,nil,"Click me!")
-clickbox.moveText(1,1)
-exit=gui.labelbox(w-3,h,3,1,101,nil,0x00AAAA,exitGUI,nil,"Exit")
-test1=gui.rect_full(70,30,20,10,nil,nil,0xFFFF00)
-test2=gui.rect_full(80,35,20,10,101,nil,0x00FFFF)
-moveR1l=gui.labelbox(6,h-6,4,0,101,nil,0x00AAFF,moveR1,nil,"Right")
-moveL1l=gui.labelbox(2,h-6,3,0,101,nil,0x00AAF0,moveL1,nil,"Left")
-moveUp1l=gui.labelbox(5,h-7,1,0,101,nil,0x00AA0F,moveUp1,nil,"Up")
-moveDown1l=gui.labelbox(4,h-5,3,0,101,nil,0x00AAF0,moveDown1,nil,"Down")
-layerUp1l=gui.labelbox(3,h-10,6,0,101,nil,0x00AAFF,layerUp1,nil,"LayerUp")
-layerDown1l=gui.labelbox(2,h-9,8,0,101,nil,0x00AA00,layerDown1,nil,"LayerDown")
-moveR2l=gui.labelbox(18,h-6,4,0,101,nil,0x00AAFF,moveR2,nil,"Right")
-moveL2l=gui.labelbox(14,h-6,3,0,101,nil,0x00AAF0,moveL2,nil,"Left")
-moveUp2l=gui.labelbox(17,h-7,1,0,101,nil,0x00AA0F,moveUp2,nil,"Up")
-moveDown2l=gui.labelbox(16,h-5,3,0,101,nil,0x00AAF0,moveDown2,nil,"Down")
-layerUp2l=gui.labelbox(15,h-2,6,0,101,nil,0x00AA00,layerUp2,nil,"LayerUp")
-layerDown2l=gui.labelbox(14,h-3,8,0,101,nil,0x00AAFF,layerDown2,nil,"LayerDown")
-showl1=gui.label(5,h-15,16,0,101,nil,nil,nil,nil,"Layer yellow: %i",test1.getLayer())
-showl2=gui.label(5,h-14,16,0,101,nil,nil,nil,nil,"Layer blue:   %i",test2.getLayer())
-local t="change foreground color to "
-local f="0xFF0000"
-changeFCol=gui.labelbox(3,20,16,1,101,nil,0xFFAAFF,chgFCol,nil,t..f)
-changeStdCol=gui.labelbox(3,23,16,1,101,nil,0xFFAAFF,chgStdCol,nil,t.."standard")
-scrollbox=gui.listing(w-10,30,8,4,101,nil,0x00FFAA,nil,nil,{"Scroll me!","This is a long text so you can test the scrolling feature","And to show you the listing shape"})
-textinput=gui.textbox(w-10,36,8,4,101,nil,0xFFAA00,textoutput,nil,"insert text")
-textoutput_shape=gui.labelbox(w-10,42,8,5,101,nil,0xFF00AA,nil,nil,"input will be here")
-]]
 
 --Usage? (no good docs)
 --labelbox(x, y, w, h, layer, fColor, bColor, clickEvent, ?, text)
 --when nil is used most params have standard values you can globally adjust.
 
---initiate this object using: [Name] = windows()
-function windows()
-    --chose "a" for better readability
-    a = {
-        title = "Name",
-        titleForegroundColor = 0xFFFFFF,
-        titleBackgroundColor = 0x0000bb,
-        contentBackgroundColor = 0x000000,
-        exitTextBackgroundColor = 0xFF0000,
-        exitText = "Exit",
-        titleHeight = 1,
-        size = { 50, 50},
-        position = { 1, 1},
-        layer = 105,
-        --ar there pending changes on the position?
-        changes = false,
+--initiate this object using: [Name] = windows:new()
+windows = {
+    name = "",
+    title = "Name",
+    titleForegroundColor = 0xFFFFFF,
+    titleBackgroundColor = 0x0000bb,
+    contentBackgroundColor = 0x0F0F0F,
+    exitTextBackgroundColor = 0xFF0000,
+    exitText = "Exit",
+    titleHeight = 0, --0 = 1 line high
+    size = { 100, 20},
+    position = { 10, 10},
+    layer = 105,
 
-        --TODO: at the moment this exits the gui. Maybe make it delete this object?
-        exit = function() running = false end,
-        
-        moveWindowR = function(self) self.position[1] = self.position[1] + 1 self.changes = true end,
-        moveWindowL = function(self) self.position[1] = self.position[1] - 1 self.changes = true end,
-        moveWindowUp = function(self) self.position[2] = self.position[2] - 1 self.changes = true end,
-        moveWindowDown = function(self) self.position[2] = self.position[2] + 1 self.changes = true end,
-        moveToForeground = function(self) self.layer = self.layer + 1 self.changes = true end,
+    closeable = true,
+    defaultContents = function(self)
+        c = {
+            self:drawTitle(), 
+            self:drawPanel(),
+            self:drawButton(1, 1, "+", 0x00FF00, function() self:moveWindowUp() end),
+            self:drawButton(1, 2, "-", 0x0000FF, function() self:moveWindowDown() end),
+            self:drawButton(1, 3, ">", 0x00BB00, function() self:moveWindowR() end),
+            self:drawButton(1, 4, "<", 0x0000BB, function() self:moveWindowL() end)
+            }
+        return c end,
 
-        drawTitle = function(self)
-            titlebar = gui.labelbox(self.position[1], 
-                                    self.position[2], 
-                                    self.size[1] - #a.exitText - 1, 
-                                    self.titleHeight,
-                                    self.layer, 
-                                    self.titleForegroundColor, 
-                                    self.titleBackgroundColor, 
-                                    self.moveToForeground, nil,
-                                    self.title)
-            exit = gui.labelbox(self.position[1] + (self.size[1] - #self.exitText),
-                                self.position[2],
-                                #self.exitText,
+    activeObjects = {},
+    --are there pending changes on the position?
+    --changes = false,
+
+    --TODO: at the moment this exits the gui. Maybe make it delete this object?
+    exit = function(self) if self.closeable == true then self:deleteWindow() end end,
+
+    moveWindowR = function(self) self:updateWindow(1) end,
+    moveWindowL = function(self) self:updateWindow(-1) end,
+    moveWindowUp = function(self) self:updateWindow(nil, -1) end,
+    moveWindowDown = function(self) self:updateWindow(nil, 1) end,
+    moveToForeground = function(self) self:updateWindow(nil, nil, 10) end,
+
+    insertActiveObjectToTable = function(self, obj) table.insert(self.activeObjects, obj) end,
+
+    drawTitle = function(self)
+        titlebar = gui.labelbox(self.position[1], 
+                                self.position[2], 
+                                self.size[1] - #self.exitText - 1, 
                                 self.titleHeight,
                                 self.layer, 
                                 self.titleForegroundColor, 
-                                self.exitTextBackgroundColor, 
-                                self.exit, nil,
-                                self.exitText)
-        end,
-        drawPanel = function(self)
-            contentPanel = gui.rect_full(self.position[1], 
-                                         self.position[2] + 1, 
-                                         self.size[1], 
-                                         self.size[2] - 1,
-                                         self.layer - 1, --Background has to be in the Background... duh...
-                                         nil, --no text => no foreground color
-                                         self.contentBackgroundColor)
-        end,
+                                self.titleBackgroundColor, 
+                                function() self:moveToForeground() end, nil,
+                                self.title)
+        exit = gui.labelbox(self.position[1] + (self.size[1] - #self.exitText),
+                            self.position[2],
+                            #self.exitText,
+                            self.titleHeight,
+                            self.layer, 
+                            self.titleForegroundColor, 
+                            self.exitTextBackgroundColor, 
+                            function() self:exit() end, nil,
+                            self.exitText)
+        self:insertActiveObjectToTable(exit)
+        self:insertActiveObjectToTable(titlebar)
+    end,
 
-        --use relX and relY with  to align relative to window
-        drawButton = function(self, relX, relY, description, color, clickEvent)
-            absX = self.position[1] + (self.size[1]/relX)
-            absY = self.position[1] + (self.size[1]/relY)
-            button = gui.labelbox(  absX, 
-                                    absY, 
-                                    #description, 
-                                    1,
-                                    self.layer, 
-                                    nil, 
-                                    color, 
-                                    clickEvent, nil,
-                                    description)
-        end,
-        
-        --insert wanted content into this table.
-        windowContents = function(self)
-            b = {self:drawTitle(), 
-                self:drawPanel(), 
-                self:drawButton(0.1, 0.3, "Hoch", 0x00FF00, self.moveWindowUp),
-                self:drawButton(0.1, 0.1, "Runter", 0x0000FF, self.moveWindowDown)}
-        return b end,
-        
-        --used for updating the contents
-        drawWindow = function(self)
-            for i, method in ipairs(self:windowContents()) do
-                method()
-            end
-            self.changes = false
+    drawPanel = function(self)
+        contentPanel = gui.rect_full(self.position[1], 
+                                        self.position[2] + 1, 
+                                        self.size[1], 
+                                        self.size[2] - 1,
+                                        self.layer - 1, --Background has to be in the Background... duh...
+                                        nil, --no text => no foreground color
+                                        self.contentBackgroundColor)
+        self:insertActiveObjectToTable(contentPanel)
+    end,
+
+    --use relX and relY with  to align relative to window
+    drawButton = function(self, relX, relY, description, color, clickEvent)
+        if relX > self.size[1] then relX = self.size[1] end
+        if relY > self.size[2] then relY = self.size[2] end
+        absX = self.position[1] + (relX)
+        absY = self.position[2] + (relY)
+        button = gui.labelbox(  absX, 
+                                absY, 
+                                #description, 
+                                0,
+                                self.layer, 
+                                nil, 
+                                color, 
+                                clickEvent, nil,
+                                description)
+        self:insertActiveObjectToTable(button)
+        return button
+    end,
+
+    insertObjectToContents = function(self, object)
+        content = self:windowContents()
+        table.insert(content, object)
+        function self:windowContents()
+            b = content
+            return b
         end
-        
-    }
-    return a
-end
+    end,
 
-Window1 = windows()
+    resetContents = function(self)
+        function self:windowContent()
+            b = self:defaultContents()
+            return b
+        end
+    end,
+
+    --do it my boy, draw it!
+    drawProgressBar = function(self, relX, relY, value, maxValue, description, width, color, backgroundColor, warningThreshold)
+        color = color or 0x00FF00
+        warningThreshold = warningThreshold or 20
+        description = description or "Name"
+        width = width or 10
+        backgroundColor = backgroundColor or self.contentBackgroundColor
+        percentage = (value*100)/maxValue
+        if percentage < warningThreshold then color = 0xBB0000 end
+
+        if relX > self.size[1] then relX = self.size[1] end
+        if relY > self.size[2] then relY = self.size[2] end
+        absX = self.position[1] + (relX)
+        absY = self.position[2] + (relY)
+
+        outline = gui.labelbox( absX, 
+                                absY, 
+                                width, 
+                                1,
+                                self.layer, 
+                                nil, 
+                                backgroundColor, 
+                                nil, nil,
+                                description)
+        bar = gui.labelbox (absX,
+                            absY + 1,
+                            math.floor((width * percentage) / 100),
+                            0,
+                            self.layer, 
+                            nil, 
+                            color)
+        self:insertActiveObjectToTable(outline)
+        self:insertActiveObjectToTable(bar)
+    end,
+    
+    --insert wanted content into this table.
+    windowContents = function(self)
+        b = self:defaultContents()
+        return b end,
+
+    --Init Window
+    drawWindow = function(self)
+        self.activeObjects = {}
+        for i, method in ipairs(self:windowContents()) do
+            method()
+        end
+    end,
+
+    --used for updating the contents when moved (args may be nil for content updates)
+    updateWindow = function(self, x, y, layer)
+        for i, object in ipairs(self.activeObjects) do
+            object.move(x, y, layer)
+            --object.update()
+        end
+    end,
+
+    rebootWindow = function(self)
+        self:deleteWindow()
+        self:drawWindow()
+    end,
+
+    --delete all window objects
+    deleteWindow = function(self)
+        for i, object in ipairs(self.activeObjects) do
+            object.remove(false) --remove all objects and show layers behind it
+        end
+    end,
+
+    -- Constructor
+    new = function(self, name, o)
+        self.__index = self
+        o = o or {}
+        local inst = setmetatable(o, self)
+        inst.name = name
+        self.title = name
+        return inst
+    end
+}
+
+Window1 = windows:new("Win1")
+Window2 = windows:new("Win2")
+ExitWindow = windows:new("Exit")
+
+Window2.size = {50, 10}
+Window2.position = {1, 1}
+Window2.layer = 101
+Window2.titleBackgroundColor = 0x00bb00
+
+ExitWindow.size = {30, 10}
+ExitWindow.position = {100, 1}
+ExitWindow.closeable = false
+ExitWindow.contentBackgroundColor = 0xbbbbbb
+ExitWindow:insertObjectToContents(ExitWindow:drawButton(5, 1, "Exit GUI", 0xFF0000, function() running = false end))
+Window1:insertObjectToContents(Window1:drawProgressBar(5, 3, 25, 100, "TestBar", 10))
+
+
 Window1:drawWindow()
+Window2:drawWindow()
+ExitWindow:drawWindow()
 
 while running do
     os.sleep(0.2)
-    if Window1.changes then
-        Window1:drawWindow()
-    end
+    --just loop. put some looping shit here!
 end
+--os.execute("reboot")
 gui.stopGUI()
 os.exit()
