@@ -8,12 +8,15 @@ NO = {"n","no","N","No","NO"}
 
 SupportedRemotes = {
     Github = {
+        Name = "GitHub",
         BaseUrl = "https://github.com/",
         RawApiUrl = "https://raw.githubusercontent.com/",
         Implemented = true
     },
     Gitea = {
+        Name = "Gitea",
         BaseUrl = "https://git.realrobin.io",
+        RawApiUrl = nil,
         Implemented = false
     }
 }
@@ -280,27 +283,6 @@ local function createManifest(installedDependencies, installedFiles, installedSh
     end
 end
 
---- fix legacy shit
-local function runFullInstallTask(repository, shortcutName)
-    --- first, download the actual repo.
-    --- then, find dependencies - if then exist, download and install them
-    --- then, install the actual program
-    local installTargetDir  = "/usr/"..repository.Name
-    local shortcutTargetDir = "/usr/bin/"
-    local downloadTargetDir = DefaultTemporaryDownloadPath..repository.RepoIdentifier
-    local manifestTarget = "/etc/manifest/"
-
-    local installedDependencies = legacyInstallDependencies() --only for testing while new version not implemented yet
-    print("downloading "..repository.RepoIdentifier)
-    local downloadedFiles = downloadRepo(repository, repository.Remote, false, downloadTargetDir) --enable auto-overwrite in other situations still todo
-    local installedFiles = installFiles(downloadedFiles, downloadTargetDir, installTargetDir)
-    local installedShortcuts = installShortcut(repository.CurrentLocalPath, shortcutName, shortcutTargetDir)
-
-    --- remove temporary files and create manifest for later uninstall
-    removeDownloads(downloadTargetDir, downloadedFiles)
-    createManifest(installedDependencies, installedFiles, installedShortcuts, manifestTarget, repository.Name)
-end
-
 local function printHelpText()
     local helpText =        "This updater pulls the git files for installation and application updates.\n"..
     "Usage:\n" ..
@@ -314,6 +296,77 @@ local function run(cliArgs)
     local repo = EmptyRepository
     local shortcutName = nil
 
+    local function setupDefaultInstall()
+        --- fix legacy shit
+        local function runFullInstallTask(repository, shortcutName)
+            --- first, download the actual repo.
+            --- then, find dependencies - if then exist, download and install them
+            --- then, install the actual program
+            local installTargetDir  = "/usr/"..repository.Name
+            local shortcutTargetDir = "/usr/bin/"
+            local downloadTargetDir = DefaultTemporaryDownloadPath..repository.RepoIdentifier
+            local manifestTarget = "/etc/manifest/"
+
+            local installedDependencies = legacyInstallDependencies() --only for testing while new version not implemented yet
+            print("downloading "..repository.RepoIdentifier)
+            local downloadedFiles = downloadRepo(repository, repository.Remote, false, downloadTargetDir) --enable auto-overwrite in other situations still todo
+            local installedFiles = installFiles(downloadedFiles, downloadTargetDir, installTargetDir)
+            local installedShortcuts = installShortcut(repository.CurrentLocalPath, shortcutName, shortcutTargetDir)
+
+            --- remove temporary files and create manifest for later uninstall
+            removeDownloads(downloadTargetDir, downloadedFiles)
+            createManifest(installedDependencies, installedFiles, installedShortcuts, manifestTarget, repository.Name)
+        end
+        --- ask user about repo
+        if askYesOrNoQuestion("Use default config? (github::seesberger/PowerManager)?",YES,NO,true) == true then
+            repo = DefaultRepository
+            --- ask user about shortcutname
+            if askYesOrNoQuestion("Use default shortcut name \"powerman\"?",YES,NO,true) then shortcutName = "powerman" end
+            runFullInstallTask(repo, shortcutName)
+        else print("other things not implemented yet") end
+    end
+
+    local function setupExperimentalCustomInstall()
+        if askYesOrNoQuestion("Are you sure about using experimental custom install?") then
+            print("Asking some questions about repo to set up:")
+            --- remote setup
+            local remoteAnswer = askTextQuestion("Github (default on ENTER) or Gitea?", "Github", {"Github", "Gitea"})
+            if remoteAnswer == "Github" then repo.Remote = SupportedRemotes.Github
+            elseif remoteAnswer == "Gitea" then repo.Remote = SupportedRemotes.Gitea
+            end
+            --- owner and name -> repoIdentifier?
+            repo.Owner = askTextQuestion("Owner of Repo? (DEFAULT: seesberger)", "seesberger")
+            repo.Name = askTextQuestion("Name of Repo? (DEFAULT: PowerManager)", "PowerManager")
+            repo.RepoIdentifier = askTextQuestion("Use "..repo.Owner.."/"..repo.Name.."? (ENTER) or type custom repo id: ", repo.Owner.."/"..repo.Name)
+            --- shortcut name?
+            repo.ShortName = askTextQuestion("How will the shortcut be called? (default powerman): ", "powerman")
+            --- branch name? todo implement downloaing tags
+            repo.CurrentBranch = askTextQuestion("please specify branch to download (default master): ", "master")
+            repo.CurrentLocalPath = ""
+
+            --- 1. download the actual repo.
+            --- 2. find dependencies - if then exist, download and install them
+            --- 3. install the actual program
+            local installTargetDir  = "/usr/"..repo.Name
+            local shortcutTargetDir = "/usr/bin/"
+            local downloadTargetDir = DefaultTemporaryDownloadPath..repo.RepoIdentifier
+            local manifestTarget = "/etc/manifest/" -- should maybe be "/home/.git-tool/"
+
+            --- FIXME FIXME FIXME
+            --- local installedDependencies = legacyInstallDependencies() --only for testing while new version not implemented yet
+            --- local installedDependencies = installDependencies(foundDependencies) <<--- This needs to happen after the repo has been downloaded. the repo will need to specify dependencies itself.
+            local installedDependencies = {}
+            print("downloading "..repo.RepoIdentifier.." from "..repo.Remote.Name)
+            local downloadedFiles = downloadRepo(repo, repo.Remote, false, downloadTargetDir) --enable auto-overwrite in other situations still todo
+            local installedFiles = installFiles(downloadedFiles, downloadTargetDir, installTargetDir)
+            local installedShortcuts = installShortcut(repo.CurrentLocalPath, shortcutName, shortcutTargetDir)
+
+            --- remove temporary files and create manifest for later uninstall
+            removeDownloads(downloadTargetDir, downloadedFiles)
+            createManifest(installedDependencies, installedFiles, installedShortcuts, manifestTarget, repo.Name)
+        end
+    end
+
     if #cliArgs<1 then
         print("No Arguments given. For help, please check -h or --help")
         return
@@ -322,17 +375,14 @@ local function run(cliArgs)
         printHelpText()
         return
     elseif cliArgs[1] == "-d" then
-        --- ask user about repo
-        if askYesOrNoQuestion("Use default config? (github::seesberger/PowerManager)?",YES,NO,true) == true then
-            repo = DefaultRepository
-            --- ask user about shortcutname
-            if askYesOrNoQuestion("Use default shortcut name \"powerman\"?",YES,NO,true) then shortcutName = "powerman" end
-            runFullInstallTask(repo, shortcutName)
-        --- TODO non-default config
-        else print("other things not implemented yet") end
+        setupDefaultInstall()
+        return
+    elseif cliArgs[1] == "-x" then
+        setupExperimentalCustomInstall()
+        return
     else
         print('"'..cliArgs[1]..'" - Bad argument. Try --help')
-    print("Program exited.")
+    print("Program exiting....")
     end
 end
 
