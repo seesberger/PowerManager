@@ -86,7 +86,7 @@ local function makeDirIfNotExists(target)
 end
 
 --- todo: pcall and catch errors
-local function downloadRepo(repository, remote, autoOverride)
+local function downloadRepo(repository, remote, autoOverride, targetDownloadPath)
 
     local function validateRepositoryIdentifier(repository)
         if not repository.RepoIdentifier:match("^[%w-.]*/[%w-.]*$") then
@@ -98,7 +98,6 @@ local function downloadRepo(repository, remote, autoOverride)
     validateRepositoryIdentifier(repository)
 
     --- FIXME: If download only mode is enabled, set this to /home. still todo
-    local targetDownloadPath = DefaultTemporaryDownloadPath..repository.RepoIdentifier
     repository.CurrentLocalPath = targetDownloadPath.."/"
     local success, res = pcall(makeDirIfNotExists, targetDownloadPath)
     if not success then error("the download failed because of filesystem errors.") end
@@ -205,7 +204,6 @@ local function downloadRepo(repository, remote, autoOverride)
 
     success, res = pcall(downloadFiles, files, targetDownloadPath, replaceMode)
     if success then print("All files downloaded successfully.") return res else error(res) end
-
 end
 
 local function installFiles(downloadedFiles, downloadTargetDir, installTargetDir)
@@ -215,12 +213,13 @@ local function installFiles(downloadedFiles, downloadTargetDir, installTargetDir
     local replace = true
     makeDirIfNotExists(installTargetDir)
     for idx, file in pairs(downloadedFiles) do
-        print(idx..": Installing File "..downloadTargetDir..file:sub(2,-1).." to target directory "..installTargetDir..file)
+        local absoluteDownloadFilePath = downloadTargetDir.."/"..file:sub(2,-1)
+        print(idx..": Installing File "..absoluteDownloadFilePath.." to target directory "..installTargetDir..file)
         local fileExists = filesystem.exists(installTargetDir..file)
         if fileExists and replace then filesystem.remove(installTargetDir..file) end
         if replace or (replace == nil) then
             --- TODO @Freddy: Coole Animation hinzufügen
-            os.execute("cp "..downloadTargetDir..file:sub(2,-1).." "..installTargetDir..file)
+            os.execute("cp "..absoluteDownloadFilePath.." "..installTargetDir..file)
             table.insert(installedFiles, installTargetDir..file)
         else error("file not removed, but installation was cancelled - This might result in a broken install.") end
     end
@@ -230,7 +229,9 @@ end
 local function installShortcut(currentRepoPath, shortcutName, targetDir)
     print("installing shortcut...")
     makeDirIfNotExists(targetDir)
-    os.execute("mv "..currentRepoPath.."shortcut.lua "..targetDir..shortcutName..".lua")
+    local shortcutInstallTarget = currentRepoPath.."shortcut.lua "..targetDir..shortcutName..".lua"
+    os.execute("mv "..shortcutInstallTarget)
+    return {shortcutInstallTarget}
 end
 
 --- todo: automatic read of dependency list (txt file containing lines with <link> <dst> or somethink like it)
@@ -241,6 +242,8 @@ local function legacyInstallDependencies()
     os.execute("wget -f https://github.com/kevinkk525/OC-GUI-API/raw/master/GUI.lua /lib/GUI.lua")
     os.execute("wget -f https://github.com/kevinkk525/OC-GUI-API/raw/master/term_mod.lua /lib/term_mod.lua")
     os.execute("wget -f https://github.com/kevinkk525/OC-GUI-API/raw/master/tech_demo.lua /home/GUI_tech_demo.lua")
+    local installedDependencies = {"/lib/shapes_default.lua", "/lib/GUI.lua", "/lib/term_mod.lua", "/home/GUI_tech_demo.lua"}
+    return installedDependencies
 end
 
 local function removeDownloads(downloadTargetDir, downloadedFiles)
@@ -253,7 +256,11 @@ local function removeDownloads(downloadTargetDir, downloadedFiles)
     print("cleaned temporary files.")
 end
 
-local function createManifest(installedFiles, installedShortcuts, manifestTarget, repoName)
+local function removeFilesViaManifest(manifestTarget)
+    --- todo
+end
+
+local function createManifest(installedDependencies, installedFiles, installedShortcuts, manifestTarget, repoName)
     makeDirIfNotExists(manifestTarget)
     local manifest = ""
     for idx, file in pairs(installedFiles) do
@@ -262,8 +269,11 @@ local function createManifest(installedFiles, installedShortcuts, manifestTarget
     for idy, shortcut in pairs(installedShortcuts) do
         manifest = manifest..shortcut.."\n"
     end
-    print("writing manifest to "..manifestTarget.."/"..repoName)
-    local file=io.open(manifestTarget.."/"..repoName,"w")
+    for idz, dependency in pairs(installedDependencies) do
+        manifest = manifest..dependency.."\n"
+    end
+    print("writing manifest to "..manifestTarget..repoName)
+    local file=io.open(manifestTarget..repoName,"w")
     if file then -- might be nil under wierd circumstances
         file:write(manifest)
         file:close()
@@ -277,16 +287,18 @@ local function runFullInstallTask(repository, shortcutName)
     --- then, install the actual program
     local installTargetDir  = "/usr/"..repository.Name
     local shortcutTargetDir = "/usr/bin/"
-    local downloadTargetDir = DefaultTemporaryDownloadPath
+    local downloadTargetDir = DefaultTemporaryDownloadPath..repository.RepoIdentifier
     local manifestTarget = "/etc/manifest/"
 
-    legacyInstallDependencies() --only for testing while new version not implemented yet
+    local installedDependencies = legacyInstallDependencies() --only for testing while new version not implemented yet
     print("downloading "..repository.RepoIdentifier)
-    local downloadedFiles = downloadRepo(repository, repository.Remote, false) --enable auto-overwrite in other situations still todo
+    local downloadedFiles = downloadRepo(repository, repository.Remote, false, downloadTargetDir) --enable auto-overwrite in other situations still todo
     local installedFiles = installFiles(downloadedFiles, downloadTargetDir, installTargetDir)
     local installedShortcuts = installShortcut(repository.CurrentLocalPath, shortcutName, shortcutTargetDir)
+
+    --- remove temporary files and create manifest for later uninstall
     removeDownloads(downloadTargetDir, downloadedFiles)
-    createManifest(installedFiles, installedShortcuts, manifestTarget, repository.Name)
+    createManifest(installedDependencies, installedFiles, installedShortcuts, manifestTarget, repository.Name)
 end
 
 local function printHelpText()
