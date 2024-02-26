@@ -6,19 +6,18 @@ local event = require( "event" )
 
 local splashText = "Stromanzeige - Ultimate ROG RGB LED Edition"
 local frameTitle = "Power Monitor - Klicken zum Beenden"
- 
+
 local oldW, oldH = gpu.getResolution()
 local newW = 160
 local newH = 50
 local numberOfPanels = 2
 local panelWidth = (newW / numberOfPanels)
 gpu.setResolution(newW, newH)
- 
+
 function clearScreen()
   local w,h = gpu.getResolution()
   drawLine(1, 1, w, h, 0x000000)
 end
-
 
 function drawLine(startX, startY, stopX, stopY, colorOfLine)
   local oldColor = gpu.getBackground(false)
