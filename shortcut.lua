@@ -1,4 +1,7 @@
+--FIXME: Make it somehow dynamic and maybe use the manifest for Paths?
+
 local args = {...}
+args[2] = args[2] or ""
 local helpText = "This sophisticated toolset comes packed with a few features: \n"..
                  "Usages:\n"..
                  "powerman              - no args: starts the GUI\n"..
@@ -15,13 +18,14 @@ end
 if args[1] == "-h" then
     print(helpText)
     return
-elseif args[1] == "-exe" then
-    if #args == 2 then
-        os.execute("/usr/PowerManager/"..args[2])
-        return
-    end
-    os.execute("/usr/PowerManager/updater.lua -a")
+elseif args[1] == "-u" then
+    --FIXME: Hardcoded application folder path
+    os.execute("/usr/PowerManager/git-tool.lua "..args[2])
     return
+elseif args[1] == "-exe" then
+    os.execute("./usr/PowerManager/"..args[2])
+elseif args[1] == "-arb" then
+    os.execute("/usr/PowerManager/"..args[2])
 else
     print('"'..args[1]..'" - Bad argument.\nYou can use: powerman -h')
     return
