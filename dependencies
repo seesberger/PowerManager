@@ -1,7 +1,7 @@
 # seesberger/PowerManager master
 https://github.com/seesberger/PowerManager/raw/master/gui-lib/GUI.lua /lib/GUI.lua
 https://github.com/seesberger/PowerManager/raw/master/gui-lib/image.lua /lib/image.lua
-https://github.com/seesberger/PowerManager/raw/master/gui-lib/Color.lua /lib/Color.lua
+https://github.com/seesberger/PowerManager/raw/master/gui-lib/Color.lua /lib/color.lua
 https://github.com/seesberger/PowerManager/raw/master/gui-lib/OCIF.lua /lib/FormatModules/OCIF.lua
-https://github.com/seesberger/PowerManager/raw/master/gui-lib/AdvancedLua.lua /lib/AdvancedLua.lua
-https://github.com/seesberger/PowerManager/raw/master/gui-lib/DoubleBuffering.lua /lib/DoubleBuffering.lua
+https://github.com/seesberger/PowerManager/raw/master/gui-lib/AdvancedLua.lua /lib/advancedLua.lua
+https://github.com/seesberger/PowerManager/raw/master/gui-lib/DoubleBuffering.lua /lib/doubleBuffering.lua
