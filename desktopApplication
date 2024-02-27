@@ -15,10 +15,10 @@ window1:addChild(GUI.text(3, 2, 0x2D2D2D, "Regular window example"))
 -- Next add tabbed window
 local window2 = application:addChild(GUI.tabbedWindow(4, 3, 60, 20))
 -- Use pointer to GUI.tabBar object to add some tabs
-window2.tabBar:addItem("Apps")
-window2.tabBar:addItem("Libs")
-window2.tabBar:addItem("Pictures")
-window2.tabBar:addItem("Updates")
+window2.tabBar:addItem("Shell")
+window2.tabBar:addItem("Desktop")
+window2.tabBar:addItem("Settings")
+window2.tabBar:addItem("Reboot")
 -- Add and .onTouch() method to close button to make window be able to close
 window2.actionButtons.close.onTouch = function()
 	window2:close()
