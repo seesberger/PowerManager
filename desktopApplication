@@ -1,24 +1,46 @@
 local image = require("image")
 local GUI = require("GUI")
 
-------------------------------------------------------------------------------------------
+backgroundColor = 0x0F0F0F
+
+exitButtonDefault = {
+    idleColor = 0xBB0000,
+    pressedColor = 0x0B0000,
+    textColor = 0xFFFFFF,
+    text = "Exit to shell"
+}
 
 local application = GUI.application()
-application:addChild(GUI.panel(1, 1, application.width, application.height, 0x1E1E1E))
+-- Whole Screen application
+application:addChild(GUI.panel(1, 1, application.width, application.height, backgroundColor))
+
+function createButton(application, obj)
+    return application:addChild(GUI.adaptiveButton( 1, 1, 1, 0, 
+                                                    obj.idleColor,
+                                                    obj.textColor, 
+                                                    obj.pressedColor, 
+                                                    obj.textColor, 
+                                                    obj.text))
+end
+
+exitButton = createButton(application, exitButtonDefault)
+rebootButton = application:addChild(GUI.adaptiveButton(1, 2, 1, 0, rebootButtonColor, rebootTextColor, 0x000000, rebootTextColor, rebootText))
+
+exitButton.onTouch = function()
+    os.exit()
+end
 
 -- First, add an empty window to application
 local window1 = application:addChild(GUI.window(90, 6, 60, 20))
 -- Add a background panel and text widget to it
 window1:addChild(GUI.panel(1, 1, window1.width, window1.height, 0xF0F0F0))
-window1:addChild(GUI.text(3, 2, 0x2D2D2D, "Regular window example"))
+window1:addChild(GUI.text(3, 2, 0x2D2D2D, "Hier könnte Ihre Werbung stehen!"))
 
 -- Next add tabbed window
 local window2 = application:addChild(GUI.tabbedWindow(4, 3, 60, 20))
 -- Use pointer to GUI.tabBar object to add some tabs
 window2.tabBar:addItem("Shell")
 window2.tabBar:addItem("Desktop")
-window2.tabBar:addItem("Settings")
-window2.tabBar:addItem("Reboot")
 -- Add and .onTouch() method to close button to make window be able to close
 window2.actionButtons.close.onTouch = function()
 	window2:close()
@@ -38,14 +60,15 @@ window2.onResize = function(newWidth, newHeight)
 end
 
 -- Finally add titled window
-local window3 = application:addChild(GUI.titledWindow(50, 22, 60, 20, "Titled window example", true))
+local window3 = application:addChild(GUI.titledWindow(50, 22, 60, 20, " Energiezellenverwaltungsfenster", true))
 -- Attach an single cell layout to it
 local layout = window3:addChild(GUI.layout(1, 2, window3.width, window3.height - 1, 1, 1))
 -- Add some stuff to layout
-layout:addChild(GUI.button(1, 1, 36, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "Press me"))
-layout:addChild(GUI.button(1, 1, 36, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "And me"))
+layout:addChild(GUI.button(1, 1, 36, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "Zellen ansehen"))
+layout:addChild(GUI.button(1, 1, 36, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "Generatoren ansehen"))
 
 ------------------------------------------------------------------------------------------
 
 application:draw(true)
 application:start()
+print("Halted Desktop")
