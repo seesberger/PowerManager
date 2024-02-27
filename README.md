@@ -1,5 +1,5 @@
 
-![Logo](https://zersafter-inc.de/banner.png)
+![Logo](https://zersafter-inc.de/powerman/banner.png)s
 
 
 # Powerman - A powerful toolset for OpenComputers
