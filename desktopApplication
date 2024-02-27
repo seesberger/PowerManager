@@ -16,7 +16,7 @@ controlButtonConfig = {
             textColor = 0xFFFFFF,
             text = "Reboot",
             onTouch = function()
-                os.execute("Reboot")
+                os.execute("reboot")
             end
         },
         exitGui = {
