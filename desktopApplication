@@ -1,73 +1,156 @@
 local image = require("image")
 local GUI = require("GUI")
+local component = require("component")
 
 backgroundColor = 0x0F0F0F
+controlButtonConfig = {
+    --absolute position of the button array
+    position = { 1, 1},
+    --padding of the individual buttons
+    padding = { 2, 1},
 
-exitButtonDefault = {
-    idleColor = 0xBB0000,
-    pressedColor = 0x0B0000,
-    textColor = 0xFFFFFF,
-    text = "Exit to shell"
+    buttons = {
+        shutdown = {
+            idleColor = 0x0000BB,
+            pressedColor = 0x00000B,
+            textColor = 0xFFFFFF,
+            text = "Reboot",
+            onTouch = function()
+                os.execute("Reboot")
+            end
+        },
+        exitGui = {
+            idleColor = 0xBB0000,
+            pressedColor = 0x0B0000,
+            textColor = 0xFFFFFF,
+            text = "Exit to shell",
+            onTouch = function()
+                os.exit()
+            end
+        },
+        restartGui = {
+            idleColor = 0x01FF00,
+            pressedColor = 0x0B0B0B,
+            textColor = 0x0F0F0F,
+            text = "Restart Program",
+            onTouch = function()
+                os.execute("short")
+                os.exit()
+            end
+        }
+        --[[
+        template = {
+            idleColor = 0xFFFFFF,
+            pressedColor = 0xBBBBBB,
+            textColor = 0x0F0F0F,
+            text = "Template",
+            onTouch = function()
+                --do stuff
+            end
+        }
+        ]]
+    }
 }
+controlButtons = {}
+function createControlButtons(application, config)
+    config = config or controlButtonConfig
+    local previousButtonLength = 0
+    for i, button in pairs(config.buttons) do
+        object = application:addChild(GUI.adaptiveButton( 
+            previousButtonLength + config.position[1],
+            config.position[2],
+            config.padding[1],
+            config.padding[2],
+            button.idleColor,
+            button.textColor, 
+            button.pressedColor, 
+            button.textColor, 
+            button.text
+            ))
+        object.onTouch = button.onTouch
+        table.insert(controlButtons, object)
+        previousButtonLength = previousButtonLength + #button.text + 2*config.padding[1]
+    end
+end
 
 local application = GUI.application()
+
 -- Whole Screen application
 application:addChild(GUI.panel(1, 1, application.width, application.height, backgroundColor))
 
-function createButton(application, obj)
-    return application:addChild(GUI.adaptiveButton( 1, 1, 1, 0, 
-                                                    obj.idleColor,
-                                                    obj.textColor, 
-                                                    obj.pressedColor, 
-                                                    obj.textColor, 
-                                                    obj.text))
+createControlButtons(application)
+
+function getCells()
+    local countTEcell = 0
+    local countRfTCell = 0
+  
+    local TEcell = component.list( "energy_device" )
+    local RfTCell = component.list("rftools_powercell")
+  
+    local cellsID = {}
+    
+    for address, name in pairs(TEcell) do
+      countTEcell =  countTEcell + 1
+      if countTEcell > 1 then
+        cellsID[address] = "TE Zelle".." "..countTEcell
+      else
+        cellsID[address] = "TE Zelle"
+      end
+    end
+  
+    for address, name in pairs(RfTCell) do
+      countRfTCell = countRfTCell + 1
+      if countRfTCell > 1 then
+        cellsID[address] = "RfT Zelle".." "..countRfTCell
+      else
+        cellsID[address] = "RfT Zelle"
+      end
+    end 
+    return cellsID
 end
 
-exitButton = createButton(application, exitButtonDefault)
-rebootButton = application:addChild(GUI.adaptiveButton(1, 2, 1, 0, rebootButtonColor, rebootTextColor, 0x000000, rebootTextColor, rebootText))
-
-exitButton.onTouch = function()
-    os.exit()
+function getTotal()
+    local totalPower = 0
+    local totalMaxPower = 0
+    local cellid = getCells()
+    for address, name in pairs(cellid) do
+      local cell = component.proxy( address )
+      totalPower = totalPower + cell.getEnergyStored()
+      totalMaxPower = totalMaxPower + cell.getMaxEnergyStored()
+    end
+    return totalPower, totalMaxPower
 end
 
+function getCellPercentage(cell)
+    val = (cell.getEnergyStored() * 100) / cell.getMaxEnergyStored()
+    return val
+end
+
+cellsProgressBars = {}
+function drawCellsAsContent(obj)
+    for address, name in pairs(cellsID) do
+        local cell = component.proxy( address )
+        progressbar = obj:addChild(GUI.progressBar(1, 1, obj.width - 2, 0x3366CC, 0xEEEEEE, 0x000000, getCellPercentage(cell) , true, true, name, " RF"))
+        table.insert(cellsProgressBars, progressbar)
+    end
+end
+local progressbars = application:addChild(GUI.titledwindow(50, 10, 40, 30))
+drawCellsAsContent(progressbars)
 -- First, add an empty window to application
 local window1 = application:addChild(GUI.window(90, 6, 60, 20))
 -- Add a background panel and text widget to it
 window1:addChild(GUI.panel(1, 1, window1.width, window1.height, 0xF0F0F0))
-window1:addChild(GUI.text(3, 2, 0x2D2D2D, "Hier könnte Ihre Werbung stehen!"))
+window1:addChild(GUI.text(2, 3, 0x2D2D2D, "Hier könnte Ihre Werbung stehen!"))
+progressbar = window1:addChild(GUI.progressBar(1, 1, window1.width, 0x3366CC, 0xEEEEEE, 0x000000, 50, true, true, "Fick-Dich-Meter: ", ""))
 
--- Next add tabbed window
-local window2 = application:addChild(GUI.tabbedWindow(4, 3, 60, 20))
--- Use pointer to GUI.tabBar object to add some tabs
-window2.tabBar:addItem("Shell")
-window2.tabBar:addItem("Desktop")
--- Add and .onTouch() method to close button to make window be able to close
-window2.actionButtons.close.onTouch = function()
-	window2:close()
-	application:draw()
-end
--- Do the same with maximize button
-window2.actionButtons.maximize.onTouch = function()
-	window2:maximize()
-	application:draw()
-end
--- Add callback method which is called on window resize. Use passed parameters to set sizes of window child objects
-window2.onResize = function(newWidth, newHeight)
-	window2.tabBar.width = newWidth
-	window2.backgroundPanel.width = newWidth
-	window2.backgroundPanel.height = newHeight - window2.tabBar.height
-	application:draw()
-end
-
--- Finally add titled window
-local window3 = application:addChild(GUI.titledWindow(50, 22, 60, 20, " Energiezellenverwaltungsfenster", true))
+-- titled window
+local window3 = application:addChild(GUI.titledWindow(50, 22, 60, 20, "-Change content of other window", true))
 -- Attach an single cell layout to it
 local layout = window3:addChild(GUI.layout(1, 2, window3.width, window3.height - 1, 1, 1))
 -- Add some stuff to layout
-layout:addChild(GUI.button(1, 1, 36, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "Zellen ansehen"))
-layout:addChild(GUI.button(1, 1, 36, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "Generatoren ansehen"))
-
-------------------------------------------------------------------------------------------
+higherButton = layout:addChild(GUI.button(1, 1, 50, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "+++"))
+lowerButton = layout:addChild(GUI.button(1, 1, 50, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "---"))
+inputField = layout:addChild(GUI.input(2, 2, 30, 3, 0xB4B4B4, 0x555555, 0x999999, 0xFFFFFF, 0x2D2D2D, "Saftiger Saft", "Input"))
 
 application:draw(true)
 application:start()
