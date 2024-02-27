@@ -23,9 +23,9 @@ elseif args[1] == "-u" then
     os.execute("/usr/PowerManager/git-tool.lua "..args[2])
     return
 elseif args[1] == "-exe" then
-    os.execute("./usr/PowerManager/"..args[2])
-elseif args[1] == "-arb" then
     os.execute("/usr/PowerManager/"..args[2])
+elseif args[1] == "-arb" then
+    os.execute("/bin/"..args[2])
 else
     print('"'..args[1]..'" - Bad argument.\nYou can use: powerman -h')
     return
