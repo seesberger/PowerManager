@@ -1,9 +1,11 @@
 local args = {...}
-local helpText = "This is a tool for displaying and managing your Power cells and generators.\n"..
+local helpText = "This sophisticated toolset comes packed with a few features: \n"..
                  "Usages:\n"..
-                 "powerman <option> - no args: starts the application\n"..
-                 "   ''       -h    - this help text\n" .. 
-                 "   ''     update <update argument>"
+                 "powerman              - no args: starts the GUI\n"..
+                 "   '' -h              - this help text\n" .. 
+                 "   '' -u              - starts the git-tool"..
+                 "   '' -exe [filename] - executes the give file in the Application folder"..
+                 "   '' -arb [command]  - executes an arbitrary function that is yet to be defined"
 
 if #args<1 then
     dofile("/usr/PowerManager/main.lua")
@@ -13,9 +15,9 @@ end
 if args[1] == "-h" then
     print(helpText)
     return
-elseif args[1] == "update" then
+elseif args[1] == "-exe" then
     if #args == 2 then
-        os.execute("/usr/PowerManager/updater.lua "..args[2])
+        os.execute("/usr/PowerManager/"..args[2])
         return
     end
     os.execute("/usr/PowerManager/updater.lua -a")
