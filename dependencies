@@ -1,5 +1,7 @@
-# kevinkk525/OC-GUI-API master
-https://github.com/kevinkk525/OC-GUI-API/raw/master/shapes_default.lua /lib/shapes_default.lua
-https://github.com/kevinkk525/OC-GUI-API/raw/master/GUI.lua /lib/GUI.lua
-https://github.com/kevinkk525/OC-GUI-API/raw/master/term_mod.lua /lib/term_mod.lua
-https://github.com/kevinkk525/OC-GUI-API/raw/master/tech_demo.lua /home/GUI_tech_demo.lua
+# seesberger/PowerManager master
+https://github.com/seesberger/PowerManager/raw/master/gui-lib/GUI.lua /lib/GUI.lua
+https://github.com/seesberger/PowerManager/raw/master/gui-lib/image.lua /lib/image.lua
+https://github.com/seesberger/PowerManager/raw/master/gui-lib/Color.lua /lib/Color.lua
+https://github.com/seesberger/PowerManager/raw/master/gui-lib/OCIF.lua /lib/FormatModules/OCIF.lua
+https://github.com/seesberger/PowerManager/raw/master/gui-lib/AdvancedLua.lua /lib/AdvancedLua.lua
+https://github.com/seesberger/PowerManager/raw/master/gui-lib/DoubleBuffering.lua /lib/DoubleBuffering.lua
