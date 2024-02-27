@@ -232,8 +232,9 @@ end
 local function installShortcut(currentRepoPath, shortcutName, targetDir)
     print("installing shortcut...")
     makeDirIfNotExists(targetDir)
-    local shortcutInstallTarget = currentRepoPath.."shortcut.lua "..targetDir..shortcutName..".lua"
-    os.execute("mv "..shortcutInstallTarget)
+    local currentTarget = currentRepoPath.."shortcut.lua"
+    local shortcutInstallTarget = targetDir..shortcutName..".lua"
+    os.execute("mv "..currentTarget.." "..shortcutInstallTarget)
     return {shortcutInstallTarget}
 end
 
@@ -254,6 +255,7 @@ local function installDependencies(repository)
     ---reads the dependency file to create a list of dependencies: {{"url1","installpath1"},{"url2","installpath2"}} 
     local function createDependencyList(currentRepoPath)
         --- assume repository is well-formed. try catch maybe later on
+        --- FIXME: Add capability of dependency.lua file containing a table describing deps which is then dynamically loaded on runtime
         local function readDependencyFile(filePath, commentChar)
             local file = io.open(filePath, "rb")
             if not file then error("file io error") end
@@ -374,6 +376,8 @@ local function removeFilesViaManifest(manifestTarget)
         end
     end
     manifestFile:close()
+    local fileExists = filesystem.exists(manifestTarget)
+    if fileExists then filesystem.remove(manifestTarget) end
     return success, removedFiles
 end
 
@@ -401,8 +405,10 @@ local function printHelpText()
     local helpText =        "This updater pulls the git files for installation and application updates.\n"..
     "Usage:\n" ..
     "updater <option>  - no args: manual update and install\n"..
-    "  '' -h or        - this help text\n"..
-    "  '' -d or        - install default config"
+    "  '' -h         - this help text\n"..
+    "  '' -d         - LEGACY: install default config (will be removed in subsequent releases)\n"..
+    "  '' -x         - install custom repository (experimental)\n"..
+    "  '' -u         - uninstall via manifest"
     print(helpText)
 end
 
@@ -484,7 +490,7 @@ local function run(cliArgs)
 
     local function uninstallViaManifest()
         print("DANGER: A malformed manifest file can trigger unwanted removal of files! Be careful and only use if you know what you are doing.")
-        local manifestTarget = askTextQuestion("Which manifest file do you want to use? (ENTER with empty input to abort)", nil, nil)
+        local manifestTarget = "/etc/manifest/"..askTextQuestion("Which manifest file do you want to use? (ENTER with empty input to abort, looking in /etc/manifest)", nil, nil)
         if manifestTarget then removeFilesViaManifest(manifestTarget) else print("Aborted. No harm was done.") end
     end
 
