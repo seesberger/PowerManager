@@ -65,7 +65,7 @@ controlButtons = {}
 function createControlButtons(application, config)
     config = config or controlButtonConfig
     local previousButtonLength = 0
-    application:addChild(GUI.panel(1, 1, application.width, (2*config.padding) + 1, taskBarColor))
+    application:addChild(GUI.panel(1, 1, application.width, (2*config.padding[2]) + 1, taskBarColor))
     for i, button in pairs(config.buttons) do
         object = application:addChild(GUI.adaptiveFramedButton( 
             previousButtonLength + config.position[1],
