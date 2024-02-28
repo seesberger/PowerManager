@@ -6,44 +6,57 @@ local unicode=require("unicode")
 YES = {"y","yes","Y","Yes","YES"}
 NO = {"n","no","N","No","NO"}
 
-SupportedRemotes = {
-    Github = {
-        Name = "GitHub",
-        BaseUrl = "https://github.com/",
-        RawApiUrl = "https://raw.githubusercontent.com/",
-        Implemented = true
+--TODO: Make the config a file and read it on startup.
+DefaultSettings = {
+    SupportedRemotes = {
+        Github = {
+            Name = "GitHub",
+            BaseUrl = "https://github.com/",
+            RawApiUrl = "https://raw.githubusercontent.com/",
+            Implemented = true
+        },
+        Gitea = {
+            Name = "Gitea",
+            BaseUrl = "https://git.realrobin.io",
+            RawApiUrl = nil,
+            Implemented = false
+        }
     },
-    Gitea = {
-        Name = "Gitea",
-        BaseUrl = "https://git.realrobin.io",
-        RawApiUrl = nil,
-        Implemented = false
-    }
+
+    EmptyRepository = {
+        Owner = nil,
+        Name = nil,
+        ShortName = nil,
+        RepoIdentifier = nil,
+        Remote = nil,
+        CurrentBranch = nil,
+        CurrentLocalPath = nil
+    },
+
+    ---default repo to update
+    DefaultRepository = {
+        Owner = "seesberger",
+        Name = "PowerManager",
+        ShortName = "powerman",
+        RepoIdentifier = "seesberger/PowerManager",
+        Remote = SupportedRemotes.Github,
+        CurrentBranch = "master",
+        CurrentLocalPath = ""
+    },
+
+    DefaultTemporaryDownloadPath = "/home/.tmp/git/",
+    DefaultInstallationPath = "/usr/",
+    DefaultLibraryPath = "/lib/"
 }
 
-EmptyRepository = {
-    Owner = nil,
-    Name = nil,
-    ShortName = nil,
-    RepoIdentifier = nil,
-    Remote = nil,
-    CurrentBranch = nil,
-    CurrentLocalPath = nil
-}
+SupportedRemotes = DefaultSettings.SupportedRemotes
+EmptyRepository = DefaultSettings.EmptyRepository
+DefaultRepository = DefaultSettings.DefaultRepository
+DefaultTemporaryDownloadPath = DefaultSettings.DefaultTemporaryDownloadPath
+DefaultInstallationPath = DefaultSettings.DefaultInstallationPath
+DefaultLibraryPath = DefaultSettings.DefaultLibraryPath
+--end of config
 
----default repo to update
-DefaultRepository = {
-    Owner = "seesberger",
-    Name = "PowerManager",
-    ShortName = "powerman",
-    RepoIdentifier = "seesberger/PowerManager",
-    Remote = SupportedRemotes.Github,
-    CurrentBranch = "master",
-    CurrentLocalPath = ""
-}
-
-DefaultTemporaryDownloadPath = "/home/.tmp/git/"
-DefaultInstallationPath = "/usr/"
 
 local function askYesOrNoQuestion(question, expectedTrue, expectedFalse, defaultYesOnEnter)
     local function checkContains(array,value)
@@ -255,47 +268,16 @@ local function installDependencies(repository)
     ---reads the dependency file to create a list of dependencies: {{"url1","installpath1"},{"url2","installpath2"}} 
     local function createDependencyList(currentRepoPath)
         --- assume repository is well-formed. try catch maybe later on
-        --- FIXME: Add capability of dependency.lua file containing a table describing deps which is then dynamically loaded on runtime
-        local function readDependencyFile(filePath, commentChar)
-            local file = io.open(filePath, "rb")
-            if not file then error("file io error") end
 
-            local dependencyNames = {}
-            local dependencies = {}
-            local lastName = nil
-
-            for line in io.lines(filePath) do
-                print("DEBUG: line="..line)
-                if line:sub(1,1) == commentChar then
-                    local dependencyName = line:sub(3,-1) --expects "# name"
-                    lastName = dependencyName
-                    table.insert(dependencyNames, dependencyName)
-                    print("DEBUG: dependencyName="..dependencyName)
-                    goto continue_lines_loop
-                else -- expects "url target"
-                    local cnt = 0
-                    local dependency = {
-                        Name=lastName,
-                        Url=nil,
-                        InstallTarget=nil
-                    }
-                    for word in line:gmatch("%S+") do
-                        if cnt==0 then dependency.Url=word
-                            cnt = cnt+1
-                        elseif cnt==1 then dependency.InstallTarget=word end
-                    end
-                    table.insert(dependencies, dependency)
-                    print("DEBUG: words=")
-                    
-                end
-                ::continue_lines_loop::
-            end
-            file:close()
-            
-            return dependencyNames, dependencies;
+        local function readDependencyFile(filePath)
+            --reads the dependency file as table.
+            --FIXME: Remove this. works for now as lua wants requirements in /lib/
+            os.execute("cp "..filePath.." /lib/")
+            local dependencies = require("dependencies")
+            return dependencies
         end
 
-        local dependencyNames, dependencies = readDependencyFile(currentRepoPath.."dependencies", "#")
+        local dependencies = readDependencyFile(currentRepoPath.."dependencies.lua")
 
         --- names might later get version information
         local function sanityCheck(names, dependencies)
@@ -321,9 +303,9 @@ local function installDependencies(repository)
         --local sanityCheckPassed = sanityCheck(dependencyNames, dependencyWordList)
         --if not sanityCheckPassed then error("Dependency File seems broken. No dependenciess will be installed, this might result in a broken install.") end
 
-        for idx, dep in pairs(dependencies) do
-            print("DEBUG: .."..idx..": dependency={Name="..dep.Name..", Url="..dep.Url..", InstallTarget="..dep.InstallTarget.."}")
-        end
+        --for idx, dep in pairs(dependencies) do
+            --print("DEBUG: .."..idx..": dependency={Name="..dep.Name..", Url="..dep.Url..", InstallTarget="..dep.InstallTarget.."}")
+        --end
         return dependencies
     end
 
@@ -331,15 +313,21 @@ local function installDependencies(repository)
     print("Created dependency list.")
 
     local function installDependency(dependency)
-        os.execute("wget -f "..dependency.Url.." "..dependency.InstallTarget)
-        return dependency.InstallTarget
+        print("Installing "..dependency.Name)
+        --Check for scripts contained in dependencies and execute it. Makes the thn a bit more versatile
+        if dependency.Name == "Script" then
+            dependency.InstallScript(repository.CurrentLocalPath, DefaultLibraryPath)
+        else
+            os.execute("wget -f "..dependency.Url.." "..dependency.InstallTarget)
+            return dependency.InstallTarget
+        end
     end
 
     local installedDependencies = {}
     for idx, dep in pairs(dependencyList) do
-            print(idx..": Installing dependency "..dep.Name)
-            local installedDependency = installDependency(dep)
-            table.insert(installedDependencies,installedDependency)
+        print(idx..": Installing dependency "..dep.Name)
+        local installedDependency = installDependency(dep)
+        table.insert(installedDependencies,installedDependency)
     end
     return installedDependencies
 end
