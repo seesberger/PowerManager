@@ -98,7 +98,7 @@ function createCustomWindow(obj, elementsConfig, onTouch)
         },
         titleBar = {
             height = 1,
-            backgroundColor = 0x000F0F,
+            backgroundColor = 0x0000BB,
             textColor = 0xFFFFFF,
             text = "Title"
         }
@@ -107,7 +107,7 @@ function createCustomWindow(obj, elementsConfig, onTouch)
     obj:addChild(GUI.panel(1, 1, obj.width, obj.height, 0xF0F0F0))
     obj:addChild(GUI.panel(1, 1, obj.width, elementsConfig.titleBar.height, elementsConfig.titleBar.backgroundColor))
     obj:addChild(GUI.label(2, 1, obj.width, elementsConfig.titleBar.height, elementsConfig.titleBar.textColor, elementsConfig.titleBar.text))
-    close = obj:addChild(GUI.adaptiveFramedButton( 
+    close = obj:addChild(GUI.adaptiveButton( 
             obj.width - #elementsConfig.closeButton.text,
             1,0,0,
             elementsConfig.closeButton.idleColor,
@@ -137,10 +137,10 @@ buttonProgressbarUp = layoutWindow1:addChild(GUI.button(1, 1, 50, 3, 0xB4B4B4, 0
 buttonProgressbarDn = layoutWindow1:addChild(GUI.button(1, 1, 50, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "---"))
 
 buttonProgressbarUp.onTouch = function()
-    progressbarWindow1.value = progressbarWindow1 + 2
+    progressbarWindow1.value = progressbarWindow1.value + 2
 end
 buttonProgressbarDn.onTouch = function()
-    progressbarWindow1.value = progressbarWindow1 - 2
+    progressbarWindow1.value = progressbarWindow1.value - 2
 end
 
 application:draw(true)
