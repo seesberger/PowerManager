@@ -86,12 +86,44 @@ function createControlButtons(application, config)
     end
 end
 
+--To be used on a windowed panel. (GUI.window)
+function createCustomWindow(obj, elementsConfig, onTouch)
+    elementsConfig = elementsConfig or {
+        closeButton = {
+            idleColor = 0xFB0000,
+            pressedColor = 0xBB0000,
+            textColor = 0xFFFFFF,
+            text = "Exit"
+        },
+        titleBar = {
+            height = 1,
+            backgroundColor = 0x000F0F,
+            textColor = 0xFFFFFF,
+            text = "Title"
+        }
+    }
+    obj:addChild(GUI.panel(1, 1, obj.width, elementsConfig.titleBar.height, elementsConfig.titleBar.backgroundColor))
+    obj:addChild(GUI.label(2, 1, obj.width, elementsConfig.titleBar.height, elementsConfig.titleBar.textColor, elementsConfig.titleBar.text))
+    close = obj:addChild(GUI.adaptiveFramedButton( 
+            obj.width - #elementsConfig.closeButton.text,
+            1,0,0,
+            elementsConfig.closeButton.idleColor,
+            elementsConfig.closeButton.textColor, 
+            elementsConfig.closeButton.pressedColor, 
+            elementsConfig.closeButton.textColor, 
+            elementsConfig.closeButton.text))
+    close.onTouch = function() obj:close() end
+    return close
+end
+
 local application = GUI.application()
 
 -- Whole Screen application
 application:addChild(GUI.panel(1, 1, application.width, application.height, backgroundColor))
 
 createControlButtons(application)
+
+
 
 function getCells()
     local countTEcell = 0
