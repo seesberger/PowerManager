@@ -45,6 +45,8 @@ controlButtonConfig = {
             textColor = 0x0F0F0F,
             text = "Update",
             onTouch = function()
+                --FIXME: Change text color to mitigate unreadable text
+                os.execute("cls")
                 os.execute("powerman -u -x")
             end
         }
