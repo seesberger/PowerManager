@@ -46,6 +46,7 @@ controlButtonConfig = {
             text = "Update",
             onTouch = function()
                 --FIXME: Change text color to mitigate unreadable text
+                os.exit()
                 os.execute("cls")
                 os.execute("powerman -u -x")
             end
@@ -102,6 +103,8 @@ function createCustomWindow(obj, elementsConfig, onTouch)
             text = "Title"
         }
     }
+    
+    obj:addChild(GUI.panel(1, 1, obj.width, obj.height, 0xF0F0F0))
     obj:addChild(GUI.panel(1, 1, obj.width, elementsConfig.titleBar.height, elementsConfig.titleBar.backgroundColor))
     obj:addChild(GUI.label(2, 1, obj.width, elementsConfig.titleBar.height, elementsConfig.titleBar.textColor, elementsConfig.titleBar.text))
     close = obj:addChild(GUI.adaptiveFramedButton( 
@@ -125,19 +128,20 @@ createControlButtons(application)
 
 -- First, add an empty window to application
 local window1 = application:addChild(GUI.window(90, 6, 60, 20))
+createCustomWindow = createCustomWindow(window1)
 -- Add a background panel and text widget to it
-window1:addChild(GUI.panel(1, 1, window1.width, window1.height, 0xF0F0F0))
 window1:addChild(GUI.text(2, 3, 0x2D2D2D, "Hier könnte Ihre Werbung stehen!"))
-progressbar = window1:addChild(GUI.progressBar(1, 1, window1.width, 0x3366CC, 0xEEEEEE, 0x000000, 50, true, true, "Fick-Dich-Meter: ", ""))
+local layoutWindow1 = window1:addChild(GUI.layout(2, 1, window1.width, window1.height - 2, 1, 1))
+progressbarWindow1 = layoutWindow1:addChild(GUI.progressBar(1, 1, window1.width, 0x3366CC, 0xEEEEEE, 0x000000, 50, true, true, "Fick-Dich-Meter: ", ""))
+buttonProgressbarUp = layoutWindow1:addChild(GUI.button(1, 1, 50, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "+++"))
+buttonProgressbarDn = layoutWindow1:addChild(GUI.button(1, 1, 50, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "---"))
 
--- titled window
-local window3 = application:addChild(GUI.titledWindow(50, 22, 60, 20, "-Change content of other window", true))
--- Attach an single cell layout to it
-local layout = window3:addChild(GUI.layout(1, 2, window3.width, window3.height - 1, 1, 1))
--- Add some stuff to layout
-higherButton = layout:addChild(GUI.button(1, 1, 50, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "+++"))
-lowerButton = layout:addChild(GUI.button(1, 1, 50, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "---"))
-inputField = layout:addChild(GUI.input(2, 2, 30, 3, 0xB4B4B4, 0x555555, 0x999999, 0xFFFFFF, 0x2D2D2D, "Saftiger Saft", "Input"))
+buttonProgressbarUp.onTouch = function()
+    progressbarWindow1.value = progressbarWindow1 + 2
+end
+buttonProgressbarDn.onTouch = function()
+    progressbarWindow1.value = progressbarWindow1 - 2
+end
 
 application:draw(true)
 application:start()
