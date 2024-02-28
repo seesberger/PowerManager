@@ -3,6 +3,7 @@ local GUI = require("GUI")
 local component = require("component")
 
 backgroundColor = 0x0F0F0F
+taskBarColor = 0xBBBBBB;
 controlButtonConfig = {
     --absolute position of the button array
     position = { 1, 1},
@@ -34,7 +35,7 @@ controlButtonConfig = {
             textColor = 0x0F0F0F,
             text = "Restart Program",
             onTouch = function()
-                os.execute("short")
+                os.execute("powerman -exe desktopApplication")
                 os.exit()
             end
         }
@@ -55,9 +56,9 @@ controlButtons = {}
 function createControlButtons(application, config)
     config = config or controlButtonConfig
     local previousButtonLength = 0
-    application.addChild(GUI.panel(1, 1, application.width, application.height, backgroundColor))
+    application:addChild(GUI.panel(1, 1, application.width, application.height, taskBarColor))
     for i, button in pairs(config.buttons) do
-        object = application:addChild(GUI.adaptiveButton( 
+        object = application:addChild(GUI.adaptiveFramedButton( 
             previousButtonLength + config.position[1],
             config.position[2],
             config.padding[1],

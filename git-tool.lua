@@ -7,7 +7,7 @@ YES = {"y","yes","Y","Yes","YES"}
 NO = {"n","no","N","No","NO"}
 
 --TODO: Make the config a file and read it on startup.
-DefaultSettings = {
+--DefaultSettings = {
     SupportedRemotes = {
         Github = {
             Name = "GitHub",
@@ -21,7 +21,7 @@ DefaultSettings = {
             RawApiUrl = nil,
             Implemented = false
         }
-    },
+    }
 
     EmptyRepository = {
         Owner = nil,
@@ -31,7 +31,7 @@ DefaultSettings = {
         Remote = nil,
         CurrentBranch = nil,
         CurrentLocalPath = nil
-    },
+    }
 
     ---default repo to update
     DefaultRepository = {
@@ -42,20 +42,20 @@ DefaultSettings = {
         Remote = SupportedRemotes.Github,
         CurrentBranch = "master",
         CurrentLocalPath = ""
-    },
+    }
 
-    DefaultTemporaryDownloadPath = "/home/.tmp/git/",
-    DefaultInstallationPath = "/usr/",
+    DefaultTemporaryDownloadPath = "/home/.tmp/git/"
+    DefaultInstallationPath = "/usr/"
     DefaultLibraryPath = "/lib/"
-}
-
+--}
+--[[
 SupportedRemotes = DefaultSettings.SupportedRemotes
 EmptyRepository = DefaultSettings.EmptyRepository
 DefaultRepository = DefaultSettings.DefaultRepository
 DefaultTemporaryDownloadPath = DefaultSettings.DefaultTemporaryDownloadPath
 DefaultInstallationPath = DefaultSettings.DefaultInstallationPath
 DefaultLibraryPath = DefaultSettings.DefaultLibraryPath
---end of config
+--end of config]]
 
 
 local function askYesOrNoQuestion(question, expectedTrue, expectedFalse, defaultYesOnEnter)
