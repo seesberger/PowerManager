@@ -93,7 +93,9 @@ local function askTextQuestion(question, defaultAnswerOnEnter, allowOnly)
 end
 
 local function makeDirIfNotExists(target)
+    print("--DEBUG 96: "..target)
     if filesystem.exists(target) then
+        print("--DEBUG 98: "..target)
         if not filesystem.isDirectory(target) then error("target directory already exists and is not a directory.") end
         if filesystem.get(target).isReadOnly() then error("target directory is read-only.") end
     else
@@ -110,11 +112,14 @@ local function downloadRepo(repository, remote, autoOverride, targetDownloadPath
             return
         end
     end
-
+    
+    print("--DEBUG 116")
     validateRepositoryIdentifier(repository)
+    print("--DEBUG 118")
 
     --- FIXME: If download only mode is enabled, set this to /home. still todo
     repository.CurrentLocalPath = targetDownloadPath.."/" --- set globally used path for current fs operations
+    print("--DEBUG 118: "..targetDownloadPath)
     local success, res = pcall(makeDirIfNotExists, targetDownloadPath)
     if not success then error("the download failed because of filesystem errors.") end
 
