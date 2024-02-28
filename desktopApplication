@@ -55,6 +55,7 @@ controlButtons = {}
 function createControlButtons(application, config)
     config = config or controlButtonConfig
     local previousButtonLength = 0
+    application.addChild(GUI.panel(1, 1, application.width, application.height, backgroundColor))
     for i, button in pairs(config.buttons) do
         object = application:addChild(GUI.adaptiveButton( 
             previousButtonLength + config.position[1],

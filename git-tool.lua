@@ -271,9 +271,7 @@ local function installDependencies(repository)
 
         local function readDependencyFile(filePath)
             --reads the dependency file as table.
-            --FIXME: Remove this. works for now as lua wants requirements in /lib/
-            os.execute("cp "..filePath.." /lib/")
-            local dependencies = require("dependencies")
+            local dependencies = dofile(filePath)
             return dependencies
         end
 
