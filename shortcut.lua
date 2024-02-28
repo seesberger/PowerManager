@@ -6,6 +6,7 @@ local helpText = "This sophisticated toolset comes packed with a few features: \
                  "Usages:\n"..
                  "powerman              - no args: starts the GUI\n"..
                  "   '' -h              - this help text\n" .. 
+                 "   '' -gui            - executes the given file in the Application folder\n"..
                  "   '' -u              - starts the git-tool\n"..
                  "   '' -exe [filename] - executes the given file in the Application folder\n"..
                  "   '' -arb [command]  - executes an arbitrary function that is yet to be defined"
@@ -18,6 +19,10 @@ end
 if args[1] == "-h" then
     print(helpText)
     return
+elseif args[1] == "-gui" then
+    os.execute("/usr/PowerManager/desktopApplication.lua"..args[2])
+elseif args[1] == "-legacy" then
+    os.execute("/usr/PowerManager/PowerManagerLegacy.lua"..args[2])
 elseif args[1] == "-u" then
     --FIXME: Hardcoded application folder path
     os.execute("/usr/PowerManager/git-tool.lua "..args[2])

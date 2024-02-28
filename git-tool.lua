@@ -94,7 +94,9 @@ end
 
 local function makeDirIfNotExists(target)
     print("--DEBUG 96: "..target)
-    if filesystem.exists(target) then
+    local succ, arg, err = pcall(filesystem.exists, target)
+    if arg == nil then error(err) end
+    if arg then
         print("--DEBUG 98: "..target)
         if not filesystem.isDirectory(target) then error("target directory already exists and is not a directory.") end
         if filesystem.get(target).isReadOnly() then error("target directory is read-only.") end

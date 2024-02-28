@@ -3,6 +3,21 @@
 --fill out template and insert if you want to implement this feature
 
 Applications = {
+    template = {
+    name = "PowerManager",
+    description = "It is me.",
+    installDir = "/usr/PowerManager/",
+    iconPath = "",
+    shortcut = "powerman",
+    dependencies = {
+        "/lib/GUI.lua\n"..
+        "/lib/images.lua\n"..
+        "/lib/color.lua\n"..
+        "/lib/advancedLua\n"..
+        "/lib/doubleBuffering\n"..
+        "/lib/FormatModules/OCIF.lua"
+        }
+    }
     
 }
 

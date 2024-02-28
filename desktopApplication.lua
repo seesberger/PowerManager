@@ -119,6 +119,9 @@ function createCustomWindow(obj, elementsConfig, onTouch)
     return close
 end
 
+function importApplications()
+end
+
 local application = GUI.application()
 
 -- Whole Screen application
