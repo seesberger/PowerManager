@@ -14,7 +14,7 @@ controlButtonConfig = {
         shutdown = {
             idleColor = 0x0000BB,
             pressedColor = 0x00000B,
-            textColor = 0xFFFFFF,
+            textColor = 0x0F0F0F,
             text = "Reboot",
             onTouch = function()
                 os.execute("reboot")
@@ -23,7 +23,7 @@ controlButtonConfig = {
         exitGui = {
             idleColor = 0xBB0000,
             pressedColor = 0x0B0000,
-            textColor = 0xFFFFFF,
+            textColor = 0x0F0F0F,
             text = "Exit to shell",
             onTouch = function()
                 os.exit()
@@ -37,6 +37,15 @@ controlButtonConfig = {
             onTouch = function()
                 os.execute("powerman -exe desktopApplication")
                 os.exit()
+            end
+        },
+        updateApplication = {
+            idleColor = 0xFFFFFF,
+            pressedColor = 0xBBBBBB,
+            textColor = 0x0F0F0F,
+            text = "Update",
+            onTouch = function()
+                os.execute("powerman -u -x")
             end
         }
         --[[
@@ -56,7 +65,7 @@ controlButtons = {}
 function createControlButtons(application, config)
     config = config or controlButtonConfig
     local previousButtonLength = 0
-    application:addChild(GUI.panel(1, 1, application.width, application.height, taskBarColor))
+    application:addChild(GUI.panel(1, 1, application.width, (2*config.padding) + 1, taskBarColor))
     for i, button in pairs(config.buttons) do
         object = application:addChild(GUI.adaptiveFramedButton( 
             previousButtonLength + config.position[1],
