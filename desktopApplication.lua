@@ -23,22 +23,13 @@ controlButtonConfig = {
                 os.execute("reboot")
             end
         },
-        exitGui = {
-            idleColor = 0xBB0000,
-            pressedColor = 0x0B0000,
-            textColor = 0x0F0F0F,
-            text = "Exit to shell",
-            onTouch = function()
-                os.exit()
-            end
-        },
         restartGui = {
             idleColor = 0x01FF00,
             pressedColor = 0x0B0B0B,
             textColor = 0x0F0F0F,
             text = "Restart Program",
             onTouch = function()
-                os.execute("powerman -exe desktopApplication")
+                os.execute("powerman -gui")
                 os.exit()
             end
         },
@@ -50,7 +41,12 @@ controlButtonConfig = {
             onTouch = function()
                 --FIXME: Change text color to mitigate unreadable text
                 os.execute("cls")
+                print("Starting Updater...")
                 os.execute("powerman -u -x")
+                print("Going back to GUI")
+                os.sleep(0.5)
+                os.execute("powerman -gui")
+                os.exit()
             end
         }
         --[[
@@ -66,6 +62,36 @@ controlButtonConfig = {
         ]]
     }
 }
+
+--FIXME: Janky!
+activeWindows = {}
+function injectControlButtons(application, controlButtonConfig, buttons)
+    buttons = buttons or {
+        spawnWindow = {
+            idleColor = 0xFFFFFF,
+            pressedColor = 0xBBBBBB,
+            textColor = 0x0F0F0F,
+            text = "Spawn Window",
+            onTouch = function()
+                window = createCustomWindow(application, #activeWindows + 3, 2 + #activeWindows + 3)
+                table.insert(activeWindows, window)
+            end
+        },
+        minimizeAll = {
+            idleColor = 0xBB0000,
+            pressedColor = 0xBBBBBB,
+            textColor = 0x0F0F0F,
+            text = "Stop GUI",
+            onTouch = function()
+                application:stop()
+            end
+        }
+    }
+    for idx, button in pairs(buttons) do
+        table.insert(controlButtonConfig.buttons, button)
+    end
+end
+injectControlButtons(application, controlButtonConfig)
 
 function createControlButtons(application, config)
     config = config or controlButtonConfig
@@ -87,21 +113,28 @@ function createControlButtons(application, config)
             button.text
             ))
         object.onTouch = button.onTouch
-        table.insert(controlButtons, object)
         previousButtonLength = previousButtonLength + #button.text + 2*config.padding[1]
     end
-
     return controlButtons
 end
 
 --To be used on a windowed panel. (GUI.window)
-function createCustomWindow(obj, elementsConfig, onTouch)
+function createCustomWindow(application, x, y, width, height, elementsConfig, onTouch)
+    x = x or 90
+    y = y or 10
+    width = width or 50
+    height = height or 20
+
+    --Create window
+    windowObject = application:addChild(GUI.window(x, y, width, height))
+
     elementsConfig = elementsConfig or {
         closeButton = {
             idleColor = 0xFB0000,
             pressedColor = 0xBB0000,
             textColor = 0xFFFFFF,
-            text = "Exit"
+            text = "Exit",
+            onTouch = function() windowObject:close() end
         },
         titleBar = {
             height = 1,
@@ -111,22 +144,19 @@ function createCustomWindow(obj, elementsConfig, onTouch)
         }
     }
     
-    obj:addChild(GUI.panel(1, 1, obj.width, obj.height, 0xF0F0F0))
-    obj:addChild(GUI.panel(1, 1, obj.width, elementsConfig.titleBar.height, elementsConfig.titleBar.backgroundColor))
-    obj:addChild(GUI.label(2, 1, obj.width, elementsConfig.titleBar.height, elementsConfig.titleBar.textColor, elementsConfig.titleBar.text))
-    close = obj:addChild(GUI.adaptiveButton( 
-            obj.width - #elementsConfig.closeButton.text,
-            1,0,0,
+    windowObject:addChild(GUI.panel(1, 1, windowObject.width, windowObject.height, 0xF0F0F0))
+    windowObject:addChild(GUI.panel(1, 1, windowObject.width, elementsConfig.titleBar.height, elementsConfig.titleBar.backgroundColor))
+    windowObject:addChild(GUI.label(2, 1, windowObject.width, elementsConfig.titleBar.height, elementsConfig.titleBar.textColor, elementsConfig.titleBar.text))
+    close = windowObject:addChild(GUI.adaptiveButton( 
+            windowObject.width - #elementsConfig.closeButton.text -1,
+            1,1,0,
             elementsConfig.closeButton.idleColor,
             elementsConfig.closeButton.textColor, 
             elementsConfig.closeButton.pressedColor, 
             elementsConfig.closeButton.textColor, 
             elementsConfig.closeButton.text))
-    close.onTouch = function() obj:close() end
-    return close
-end
-
-function importApplications()
+    close.onTouch = elementsConfig.closeButton.onTouch
+    return windowObject, close
 end
 
 
@@ -135,23 +165,21 @@ application:addChild(GUI.panel(1, 1, application.width, application.height, back
 
 controlButtons = createControlButtons(application)
 
--- First, add an empty window to application
-local window1 = application:addChild(GUI.window(90, 6, 60, 20))
-createCustomWindow = createCustomWindow(window1)
+window1 = createCustomWindow(application)
 -- Add a background panel and text widget to it
 window1:addChild(GUI.text(2, 3, 0x2D2D2D, "Hier könnte Ihre Werbung stehen!"))
 local layoutWindow1 = window1:addChild(GUI.layout(2, 1, window1.width, window1.height - 2, 1, 1))
 progressbarWindow1 = layoutWindow1:addChild(GUI.progressBar(1, 1, window1.width, 0x3366CC, 0xEEEEEE, 0x000000, 50, true, true, "Fick-Dich-Meter: ", ""))
-buttonProgressbarUp = layoutWindow1:addChild(GUI.button(1, 1, 50, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "+++"))
-buttonProgressbarDn = layoutWindow1:addChild(GUI.button(1, 1, 50, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "---"))
+buttonProgressbarUp = layoutWindow1:addChild(GUI.button(1, 1, window1.width, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "+++"))
+buttonProgressbarDn = layoutWindow1:addChild(GUI.button(1, 1, window1.width, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "---"))
 
 buttonProgressbarUp.onTouch = function()
-    progressbarWindow1.value = progressbarWindow1.value + 2
+    progressbarWindow1.value = progressbarWindow1.value + 5
 end
 buttonProgressbarDn.onTouch = function()
-    progressbarWindow1.value = progressbarWindow1.value - 2
+    progressbarWindow1.value = progressbarWindow1.value - 5
 end
 
 application:draw(true)
 application:start()
-print("Halted Desktop")
+print("Halted Desktop, returning to Shell...")
