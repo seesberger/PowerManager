@@ -3,7 +3,7 @@
 --fill out template and insert if you want to implement this feature
 
 Applications = {
-    template = {
+    PowerManager = {
     name = "PowerManager",
     description = "It is me.",
     installDir = "/usr/PowerManager/",
@@ -18,6 +18,7 @@ Applications = {
         "/lib/FormatModules/OCIF.lua"
         }
     }
+
     
 }
 

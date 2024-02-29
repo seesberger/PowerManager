@@ -2,8 +2,11 @@ local image = require("image")
 local GUI = require("GUI")
 local component = require("component")
 
+--start full screen application
+local application = GUI.application()
+
 backgroundColor = 0x0F0F0F
-taskBarColor = 0xBBBBBB;
+taskBarColor = 0x888888;
 controlButtonConfig = {
     --absolute position of the button array
     position = { 1, 1},
@@ -46,7 +49,6 @@ controlButtonConfig = {
             text = "Update",
             onTouch = function()
                 --FIXME: Change text color to mitigate unreadable text
-                os.exit()
                 os.execute("cls")
                 os.execute("powerman -u -x")
             end
@@ -64,13 +66,16 @@ controlButtonConfig = {
         ]]
     }
 }
-controlButtons = {}
+
 function createControlButtons(application, config)
     config = config or controlButtonConfig
+    --add the controlButtons as container to the application and give them a draw function.
+    local controlButtons = application:addChild(GUI.container(1, 1, application.width, (2*controlButtonConfig.padding[2]) + 1))
+
     local previousButtonLength = 0
-    application:addChild(GUI.panel(1, 1, application.width, (2*config.padding[2]) + 1, taskBarColor))
-    for i, button in pairs(config.buttons) do
-        object = application:addChild(GUI.adaptiveFramedButton( 
+    controlButtons:addChild(GUI.panel(1, 1, application.width, (2*config.padding[2]) + 1, taskBarColor))
+    for idx, button in pairs(config.buttons) do
+        object = controlButtons:addChild(GUI.adaptiveFramedButton( 
             previousButtonLength + config.position[1],
             config.position[2],
             config.padding[1],
@@ -85,6 +90,8 @@ function createControlButtons(application, config)
         table.insert(controlButtons, object)
         previousButtonLength = previousButtonLength + #button.text + 2*config.padding[1]
     end
+
+    return controlButtons
 end
 
 --To be used on a windowed panel. (GUI.window)
@@ -122,12 +129,11 @@ end
 function importApplications()
 end
 
-local application = GUI.application()
 
 -- Whole Screen application
 application:addChild(GUI.panel(1, 1, application.width, application.height, backgroundColor))
 
-createControlButtons(application)
+controlButtons = createControlButtons(application)
 
 -- First, add an empty window to application
 local window1 = application:addChild(GUI.window(90, 6, 60, 20))
