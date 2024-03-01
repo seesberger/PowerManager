@@ -1,3 +1,4 @@
+local image = require("image")
 local GUI = require("GUI")
 
 backgroundColor = 0x000000
@@ -6,8 +7,10 @@ backgroundColor = 0x000000
 local application = GUI.application()
 -- Whole Screen application
 BackgroundPanel = application:addChild(GUI.panel(1, 1, application.width, application.height, backgroundColor))
+--stores the tasks that are being called periodically
+RunTasks = {}
 
---FIXME: Janky!
+--FIXME: just used for legacy spawnWindow. Is quite janky and needed no more. leaving it in for debugging.
 activeWindows = {}
 function systemButtons(application)
     local systemButtonConfig = {
@@ -71,6 +74,33 @@ function systemButtons(application)
                     application:stop()
                 end
             },
+            openSettings = {
+                idleColor = 0xFFFFFF,
+                pressedColor = 0xBBBBBB,
+                textColor = 0x0F0F0F,
+                text = "Settings",
+                onTouch = function()
+                    LaunchApplication(application, "/usr/PowerManager/applications/settings.lua")
+                end
+            },
+            openTemplate = {
+                idleColor = 0xFFFFFF,
+                pressedColor = 0xBBBBBB,
+                textColor = 0x0F0F0F,
+                text = "TemplateApp",
+                onTouch = function()
+                    LaunchApplication(application, "/usr/PowerManager/applications/applicationTemplate.lua")
+                end
+            },
+            openfickDich = {
+                idleColor = 0xFFFFFF,
+                pressedColor = 0xBBBBBB,
+                textColor = 0x0F0F0F,
+                text = "Fick Dich!",
+                onTouch = function()
+                    LaunchApplication(application, "/usr/PowerManager/applications/fickDichMeter.lua")
+                end
+            }
             --[[
             template = {
                 idleColor = 0xFFFFFF,
@@ -94,7 +124,7 @@ function createSystemButtons(application, config)
     local systemButtons = application:addChild(GUI.container(1, 1, application.width, (2*systemButtonConfig.padding[2]) + 1))
 
     local previousButtonLength = 0
-    systemButtons:addChild(GUI.panel(1, 1, application.width, (2*config.padding[2]) + 1, taskBarColor))
+    systemButtons:addChild(GUI.panel(1, 1, application.width, (2*config.padding[2]) + 1, 0xBBBBBB))
     for idx, button in pairs(config.buttons) do
         object = systemButtons:addChild(GUI.adaptiveFramedButton( 
             previousButtonLength + config.position[1],
@@ -194,8 +224,8 @@ function createCustomWindow(application, x, y, width, height, elementsConfig)
     
     windowObject:addChild(GUI.panel(1, 1, windowObject.width, windowObject.height, 0xF0F0F0))
     windowObject:addChild(GUI.panel(1, 1, windowObject.width, elementsConfig.titleBar.height, elementsConfig.titleBar.backgroundColor))
-    windowObject:addChild(GUI.label(2, 1, windowObject.width, elementsConfig.titleBar.height, elementsConfig.titleBar.textColor, elementsConfig.titleBar.text))
-    minimize = windowObject:addChild(GUI.adaptiveButton( 
+    windowObject.title = windowObject:addChild(GUI.label(2, 1, windowObject.width, elementsConfig.titleBar.height, elementsConfig.titleBar.textColor, elementsConfig.titleBar.text))
+    windowObject.minimizer = windowObject:addChild(GUI.adaptiveButton( 
                 windowObject.width - (#elementsConfig.closeButton.text + #elementsConfig.minimizeButton.text + 4),
                 1,1,0,
                 elementsConfig.minimizeButton.idleColor,
@@ -203,7 +233,7 @@ function createCustomWindow(application, x, y, width, height, elementsConfig)
                 elementsConfig.minimizeButton.pressedColor, 
                 elementsConfig.minimizeButton.textColor, 
                 elementsConfig.minimizeButton.text))
-    close = windowObject:addChild(GUI.adaptiveButton( 
+    windowObject.exit = windowObject:addChild(GUI.adaptiveButton( 
             windowObject.width - #elementsConfig.closeButton.text -1,
             1,1,0,
             elementsConfig.closeButton.idleColor,
@@ -212,28 +242,19 @@ function createCustomWindow(application, x, y, width, height, elementsConfig)
             elementsConfig.closeButton.textColor, 
             elementsConfig.closeButton.text))
         
-    close.onTouch = elementsConfig.closeButton.onTouch
-    minimize.onTouch = elementsConfig.minimizeButton.onTouch
-    return windowObject, minimize, close
+    windowObject.exit.onTouch = elementsConfig.closeButton.onTouch
+    windowObject.minimizer.onTouch = elementsConfig.minimizeButton.onTouch
+    return windowObject
 end
 
-function CreateMinimizedWindow(application, window)
-
-end
-
-local window1, minimize, close = createCustomWindow(application)
--- Add a background panel and text widget to it
-window1:addChild(GUI.text(2, 3, 0x2D2D2D, "Hier könnte Ihre Werbung stehen!"))
-local layoutWindow1 = window1:addChild(GUI.layout(2, 1, window1.width, window1.height - 2, 1, 1))
-progressbarWindow1 = layoutWindow1:addChild(GUI.progressBar(1, 1, window1.width, 0x3366CC, 0xEEEEEE, 0x000000, 50, true, true, "Fick-Dich-Meter: ", ""))
-buttonProgressbarUp = layoutWindow1:addChild(GUI.button(1, 1, window1.width, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "+++"))
-buttonProgressbarDn = layoutWindow1:addChild(GUI.button(1, 1, window1.width, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "---"))
-
-buttonProgressbarUp.onTouch = function()
-    progressbarWindow1.value = progressbarWindow1.value + 5
-end
-buttonProgressbarDn.onTouch = function()
-    progressbarWindow1.value = progressbarWindow1.value - 5
+function LaunchApplication(application, filePath)
+    --TODO: Add run method to methods being periodically called by eventHandler.
+    --ALSO: Make it so missing apps dont crash the GUI. (pcall?)
+    local file = dofile(filePath)
+    --most applications should return their window object pointer.
+    local initReturn = file.initialize(application)
+    --table.insert(RunTasks, file.runTask)
+    return file, initReturn
 end
 
 application:draw(true)
