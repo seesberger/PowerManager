@@ -35,19 +35,11 @@ Defaults = {
         ShortName = nil, -- for example "powerman", used for shortcur naming. string
         RepoIdentifier = nil, -- should be string "owner/name"
         Remote = nil, -- SupportedRemoted.Github
-        CurrentBranch = nil, -- branch to pull from / current repo branch
+        CurrentRef = nil, -- branch to pull from / current repo branch
         CurrentLocalPath = nil -- string to current repo location for operarions
     }
 }
---}
---[[
-SupportedRemotes = DefaultSettings.SupportedRemotes
-EmptyRepository = DefaultSettings.EmptyRepository
-DefaultRepository = DefaultSettings.DefaultRepository
-DefaultTemporaryDownloadPath = DefaultSettings.DefaultTemporaryDownloadPath
-DefaultInstallationPath = DefaultSettings.DefaultInstallationPath
-DefaultLibraryPath = DefaultSettings.DefaultLibraryPath
---end of config]]
+
 
 
 local function askYesOrNoQuestion(question, expectedTrue, expectedFalse, defaultYesOnEnter)
@@ -118,7 +110,7 @@ local function downloadRepo(repository, autoOverride, targetDownloadPath)
         dir = dir or "" -- default value, start at root dir
         if remote == SupportedRemotes.Github then
             print("fetching contents for "..repository.RepoIdentifier..dir)
-            local githubApiUrl="https://api.github.com/repos/"..repository.RepoIdentifier.."/contents"..dir
+            local githubApiUrl="https://api.github.com/repos/"..repository.RepoIdentifier.."/contents"..dir.."?ref="..repository.CurrentRef
             local success,chunks=pcall(internet.request,githubApiUrl)
             local raw=""
             local files={}
@@ -192,7 +184,7 @@ local function downloadRepo(repository, autoOverride, targetDownloadPath)
                 --- TODO @Freddy: Coole Animation hinzufügen
                 print("downloading file "..files[i])
                 --- HACK: RawApiUrl is for using Github Raw API. may have to be patched for Gitea Support
-                local url=repository.Remote.RawApiUrl..repository.RepoIdentifier.."/"..repository.CurrentBranch..files[i]
+                local url=repository.Remote.RawApiUrl..repository.RepoIdentifier.."/"..repository.CurrentRef..files[i]
                 local success,response=pcall(internet.request,url)
                 if success then
                     local raw=""
@@ -375,7 +367,7 @@ local function run(cliArgs)
             repo.Owner = askTextQuestion("Owner of Repo? (DEFAULT: seesberger)", "seesberger")
             repo.Name = askTextQuestion("Name of Repo? (DEFAULT: PowerManager)", "PowerManager")
             repo.RepoIdentifier = askTextQuestion("Use "..repo.Owner.."/"..repo.Name.."? (ENTER) or type custom repo id: ", repo.Owner.."/"..repo.Name)
-            repo.CurrentBranch = askTextQuestion("please specify branch to download (default master): ", "master")
+            repo.CurrentRef = askTextQuestion("please specify ref to download (default master): ", "master")
             repo.CurrentLocalPath = ""
 
             --- 1. download the actual repo. This will update repo to reflect config in the installconfig, like the shortcut name

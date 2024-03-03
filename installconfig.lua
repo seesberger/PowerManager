@@ -36,7 +36,7 @@ Repository = {
         ShortName = "powerman",
         RepoIdentifier = "seesberger/PowerManager",
         Remote = SupportedRemotes.Github,
-        CurrentBranch = "master",
+        CurrentRef = "master",
 -- implement: CurrentTag = "1.2.3-alpha"
 }
 
@@ -51,10 +51,11 @@ Dependencies = {
     --         ShortName = "ocgui",
     --         RepoIdentifier = "seesberger/OpenComputers-GUI",
     --         Remote = SupportedRemotes.Github,
-    --         CurrentBranch = "master"
+    --         CurrentRef = "master"
     --     }
     -- }
     GuiApi = {
+        Name = "GUI Libraries",
         Type = "IntallFiles",
         Loose = false, -- not implemented
         Files = {
