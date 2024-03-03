@@ -15,7 +15,10 @@ Config = {
             Name = "powerman",
             Target = "/usr/bin/" -- target for file shortcut.lua
         },
-        TargetDirectory = "/usr/bin/powerman",
+        TargetDirectory = {
+            Main = "/usr/bin/PowerManager",
+            Subdirs = {"/usr/bin/PowerManager/applications"}
+        },
         Files = {
             "desktopApplication.lua",
             "git-tool.lua",
@@ -56,7 +59,7 @@ Dependencies = {
     -- }
     GuiApi = {
         Name = "GUI Libraries",
-        Type = "IntallFiles",
+        Type = "InstallFiles",
         Loose = false, -- not implemented
         Files = {
             {
