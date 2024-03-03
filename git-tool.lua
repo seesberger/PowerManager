@@ -6,57 +6,39 @@ local unicode=require("unicode")
 YES = {"y","yes","Y","Yes","YES"}
 NO = {"n","no","N","No","NO"}
 
---TODO: Make the config a file and read it on startup.
---DefaultSettings = {
-    SupportedRemotes = {
-        Github = {
-            Name = "GitHub",
-            BaseUrl = "https://github.com/",
-            RawApiUrl = "https://raw.githubusercontent.com/",
-            Implemented = true
-        },
-        Gitea = {
-            Name = "Gitea",
-            BaseUrl = "https://git.realrobin.io",
-            RawApiUrl = nil,
-            Implemented = false
-        }
+SupportedRemotes = {
+    Github = {
+        Name = "GitHub",
+        BaseUrl = "https://github.com/",
+        RawApiUrl = "https://raw.githubusercontent.com/",
+        Implemented = true
+    },
+    Gitea = {
+        Name = "Gitea",
+        BaseUrl = "https://git.realrobin.io",
+        RawApiUrl = nil,
+        Implemented = false
     }
+}
+
+--TODO: Make the config a file and read it on startup.
+Defaults = {
+    TemporaryDownloadPath = "/home/.tmp/git/",
+    InstallationPath = "/usr/",
+    LibraryPath = "/lib/",
+    ManifestTarget = "/etc/manifest/", -- should maybe be "/home/.git-tool/"
+    ShortcutTargetDir = "/usr/bin/",
 
     EmptyRepository = {
-        Owner = nil,
-        Name = nil,
-        ShortName = nil,
-        RepoIdentifier = nil,
-        Remote = nil,
-        CurrentBranch = nil,
-        CurrentLocalPath = nil
+        Owner = nil, -- should be string
+        Name = nil, -- should be string
+        ShortName = nil, -- for example "powerman", used for shortcur naming. string
+        RepoIdentifier = nil, -- should be string "owner/name"
+        Remote = nil, -- SupportedRemoted.Github
+        CurrentRef = nil, -- branch to pull from / current repo branch
+        CurrentLocalPath = nil -- string to current repo location for operarions
     }
-
-    ---default repo to update
-    DefaultRepository = {
-        Owner = "seesberger",
-        Name = "PowerManager",
-        ShortName = "powerman",
-        RepoIdentifier = "seesberger/PowerManager",
-        Remote = SupportedRemotes.Github,
-        CurrentBranch = "master",
-        CurrentLocalPath = ""
-    }
-
-    DefaultTemporaryDownloadPath = "/home/.tmp/git/"
-    DefaultInstallationPath = "/usr/"
-    DefaultLibraryPath = "/lib/"
---}
---[[
-SupportedRemotes = DefaultSettings.SupportedRemotes
-EmptyRepository = DefaultSettings.EmptyRepository
-DefaultRepository = DefaultSettings.DefaultRepository
-DefaultTemporaryDownloadPath = DefaultSettings.DefaultTemporaryDownloadPath
-DefaultInstallationPath = DefaultSettings.DefaultInstallationPath
-DefaultLibraryPath = DefaultSettings.DefaultLibraryPath
---end of config]]
-
+}
 
 local function askYesOrNoQuestion(question, expectedTrue, expectedFalse, defaultYesOnEnter)
     local function checkContains(array,value)
@@ -106,7 +88,7 @@ local function makeDirIfNotExists(target)
 end
 
 --- todo: pcall and catch errors
-local function downloadRepo(repository, remote, autoOverride, targetDownloadPath)
+local function downloadRepo(repository, autoOverride, targetDownloadPath)
 
     local function validateRepositoryIdentifier(repository)
         if not repository.RepoIdentifier:match("^[%w-.]*/[%w-.]*$") then
@@ -115,13 +97,10 @@ local function downloadRepo(repository, remote, autoOverride, targetDownloadPath
         end
     end
     
-    print("--DEBUG 116")
     validateRepositoryIdentifier(repository)
-    print("--DEBUG 118")
 
     --- FIXME: If download only mode is enabled, set this to /home. still todo
     repository.CurrentLocalPath = targetDownloadPath.."/" --- set globally used path for current fs operations
-    print("--DEBUG 118: "..targetDownloadPath)
     local success, res = pcall(makeDirIfNotExists, targetDownloadPath)
     if not success then error("the download failed because of filesystem errors.") end
 
@@ -129,7 +108,7 @@ local function downloadRepo(repository, remote, autoOverride, targetDownloadPath
         dir = dir or "" -- default value, start at root dir
         if remote == SupportedRemotes.Github then
             print("fetching contents for "..repository.RepoIdentifier..dir)
-            local githubApiUrl="https://api.github.com/repos/"..repository.RepoIdentifier.."/contents"..dir
+            local githubApiUrl="https://api.github.com/repos/"..repository.RepoIdentifier.."/contents"..dir.."?ref="..repository.CurrentRef
             local success,chunks=pcall(internet.request,githubApiUrl)
             local raw=""
             local files={}
@@ -203,7 +182,7 @@ local function downloadRepo(repository, remote, autoOverride, targetDownloadPath
                 --- TODO @Freddy: Coole Animation hinzufügen
                 print("downloading file "..files[i])
                 --- HACK: RawApiUrl is for using Github Raw API. may have to be patched for Gitea Support
-                local url=repository.Remote.RawApiUrl..repository.RepoIdentifier.."/"..repository.CurrentBranch..files[i]
+                local url=repository.Remote.RawApiUrl..repository.RepoIdentifier.."/"..repository.CurrentRef..files[i]
                 local success,response=pcall(internet.request,url)
                 if success then
                     local raw=""
@@ -229,107 +208,67 @@ local function downloadRepo(repository, remote, autoOverride, targetDownloadPath
     if success then print("All files downloaded successfully.") return res else error(res) end
 end
 
-local function installFiles(downloadedFiles, downloadTargetDir, installTargetDir)
+local function installFiles(config, downloadTargetDir)
     local installedFiles = {}
+    local installTargetDir = config.Installation.TargetDirectory.Main
+    local filesToInstall = config.Installation.Files
     
     --- FIXME: ask user about replacing files.
     local replace = true
     makeDirIfNotExists(installTargetDir)
-    for idx, file in pairs(downloadedFiles) do
-        local absoluteDownloadFilePath = downloadTargetDir.."/"..file:sub(2,-1)
-        print(idx..": Installing File "..absoluteDownloadFilePath.." to target directory "..installTargetDir..file)
-        local fileExists = filesystem.exists(installTargetDir..file)
-        if fileExists and replace then filesystem.remove(installTargetDir..file) end
+    for idx, subdir in pairs(config.Installation.TargetDirectory.Subdirs) do makeDirIfNotExists(subdir) end
+
+    for idx, file in pairs(filesToInstall) do
+        local absoluteDownloadFilePath = downloadTargetDir.."/"..file
+        local fileInstallTarget = installTargetDir.."/"..file
+        print(idx..": Installing File "..absoluteDownloadFilePath.." to target "..fileInstallTarget)
+        local fileExists = filesystem.exists(fileInstallTarget)
+        if fileExists and replace then filesystem.remove(fileInstallTarget) end
         if replace or (replace == nil) then
             --- TODO @Freddy: Coole Animation hinzufügen
-            os.execute("cp "..absoluteDownloadFilePath.." "..installTargetDir..file)
-            table.insert(installedFiles, installTargetDir..file)
+            os.execute("cp "..absoluteDownloadFilePath.." "..fileInstallTarget)
+            table.insert(installedFiles, fileInstallTarget)
         else error("file not removed, but installation was cancelled - This might result in a broken install.") end
     end
     return installedFiles
 end
 
-local function installShortcut(currentRepoPath, shortcutName, targetDir)
+local function installShortcut(currentRepoPath, sourceFile, shortcutName, targetDir)
     print("installing shortcut...")
     makeDirIfNotExists(targetDir)
-    local currentTarget = currentRepoPath.."shortcut.lua"
+    local currentTarget = currentRepoPath..sourceFile
     local shortcutInstallTarget = targetDir..shortcutName..".lua"
     os.execute("mv "..currentTarget.." "..shortcutInstallTarget)
     return {shortcutInstallTarget}
 end
 
---- todo: automatic read of dependency list (txt file containing lines with <link> <dst> or somethink like it)
---- removeme
-local function legacyInstallDependencies()
-    print("Legacy Mode: Installing hardcoded dependencies...")
-    os.execute("wget -f https://github.com/kevinkk525/OC-GUI-API/raw/master/shapes_default.lua /lib/shapes_default.lua")
-    os.execute("wget -f https://github.com/kevinkk525/OC-GUI-API/raw/master/GUI.lua /lib/GUI.lua")
-    os.execute("wget -f https://github.com/kevinkk525/OC-GUI-API/raw/master/term_mod.lua /lib/term_mod.lua")
-    os.execute("wget -f https://github.com/kevinkk525/OC-GUI-API/raw/master/tech_demo.lua /home/GUI_tech_demo.lua")
-    local installedDependencies = {"/lib/shapes_default.lua", "/lib/GUI.lua", "/lib/term_mod.lua", "/home/GUI_tech_demo.lua"}
-    return installedDependencies
-end
-
-local function installDependencies(repository)
-    print("Getting information about dependencies of installation candidate")
-    ---reads the dependency file to create a list of dependencies: {{"url1","installpath1"},{"url2","installpath2"}} 
-    local function createDependencyList(currentRepoPath)
-        --- assume repository is well-formed. try catch maybe later on
-
-        local function readDependencyFile(filePath)
-            --reads the dependency file as table.
-            local dependencies = dofile(filePath)
-            return dependencies
-        end
-
-        local dependencies = readDependencyFile(currentRepoPath.."dependencies.lua")
-
-        --- names might later get version information
-        local function sanityCheck(names, dependencies)
-            -- local countDepNames = 0
-            -- local countDepWords = 0
-            -- local totalWCount = 0
-            -- for idx, name in pairs(names) do
-            --     print("DEBUG: idx="..idx.." name="..name.." count="..countDepNames.." luaCount="..countDepNames+1)
-            --     countDepNames = countDepNames+1
-            -- end
-            -- for idx, dep in pairs(dependencies) do
-            --     print("DEBUG: idx="..idx.." count="..countDepWords.." luaCount="..countDepWords+1)
-            --     countDepWords = countDepWords+1
-            -- end
-            -- print("DEBUG: cDWords="..countDepWords.." totalWC="..totalWCount.." cDNames="..countDepNames)
-            -- if totalWCount / 2 == countDepWords then
-            --     print("found "..countDepNames.." dependencies with "..countDepWords.." individual files to install.")
-            --     return true
-            -- else return false end
-            return true
-            --- FIXME historisch gewachsen
-        end
-        --local sanityCheckPassed = sanityCheck(dependencyNames, dependencyWordList)
-        --if not sanityCheckPassed then error("Dependency File seems broken. No dependenciess will be installed, this might result in a broken install.") end
-
-        --for idx, dep in pairs(dependencies) do
-            --print("DEBUG: .."..idx..": dependency={Name="..dep.Name..", Url="..dep.Url..", InstallTarget="..dep.InstallTarget.."}")
-        --end
-        return dependencies
-    end
-
-    local dependencyList = createDependencyList(repository.CurrentLocalPath)
-    print("Created dependency list.")
+local function installDependencies(dependencies)
+    print("Preparing dependency install...")
 
     local function installDependency(dependency)
         print("Installing "..dependency.Name)
         --Check for scripts contained in dependencies and execute it. Makes the thn a bit more versatile
-        if dependency.Name == "Script" then
-            dependency.InstallScript(repository.CurrentLocalPath, DefaultLibraryPath)
-        else
-            os.execute("wget -f "..dependency.Url.." "..dependency.InstallTarget)
-            return dependency.InstallTarget
+        if dependency.Type == "Script" then
+            -- FIXME how to get correct args for script? or disallow args
+            --            dependency.InstallScript(repository.CurrentLocalPath, Defaults.LibraryPath)
+            print("Dependency with type Script skipped, not Implemented")
+        elseif dependency.Type == "InstallFiles" then
+            local targets = ""
+            for idx, file in pairs(dependency.Files) do
+                if file.MakeDir then makeDirIfNotExists(file.MakeDir) end
+                os.execute("wget -f "..file.URL.." "..file.Target)
+                targets = targets..file.Target.."\n"
+            end
+            return targets
+        elseif dependency.Type == "Repository" then
+            print("Dependency with type Repository skipped, not Implemented")
+            --- TODO: Recursive run git-tool
+        else error("Dependency.Type seems malformed. Please check installconfig.lua for errors")
         end
     end
 
     local installedDependencies = {}
-    for idx, dep in pairs(dependencyList) do
+    for idx, dep in pairs(dependencies) do
         print(idx..": Installing dependency "..dep.Name)
         local installedDependency = installDependency(dep)
         table.insert(installedDependencies,installedDependency)
@@ -394,90 +333,93 @@ local function createManifest(installedDependencies, installedFiles, installedSh
     end
 end
 
+local function readInstallConfig(configfile)
+    local config, repo, deps = dofile(configfile)
+    return config, repo, deps
+end
+
 local function printHelpText()
     local helpText =        "This updater pulls the git files for installation and application updates.\n"..
     "Usage:\n" ..
-    "updater <option>  - no args: manual update and install\n"..
+    "updater <option>  - no args: default bootstrap install of powerman\n"..
     "  '' -h         - this help text\n"..
-    "  '' -d         - LEGACY: install default config (will be removed in subsequent releases)\n"..
-    "  '' -x         - install custom repository (experimental)\n"..
+    "  '' -i         - install custom repository\n"..
     "  '' -u         - uninstall via manifest"
     print(helpText)
 end
 
 local function run(cliArgs)
-    local repo = EmptyRepository
 
-    local function setupDefaultInstall()
-        --- fix legacy shit
-        local function runFullInstallTask(repository, shortcutName)
-            --- first, download the actual repo.
-            --- then, find dependencies - if then exist, download and install them
-            --- then, install the actual program
-            local installTargetDir  = "/usr/"..repository.Name
-            local shortcutTargetDir = "/usr/bin/"
-            local downloadTargetDir = DefaultTemporaryDownloadPath..repository.RepoIdentifier
-            local manifestTarget = "/etc/manifest/"
+    local function bootstrapPowerman()
+        print("Installing PowerMan from Github (master) with default settings")
+        local repo = Defaults.EmptyRepository
 
-            local installedDependencies = legacyInstallDependencies() --only for testing while new version not implemented yet
-            print("downloading "..repository.RepoIdentifier)
-            local downloadedFiles = downloadRepo(repository, repository.Remote, false, downloadTargetDir) --enable auto-overwrite in other situations still todo
-            local installedFiles = installFiles(downloadedFiles, downloadTargetDir, installTargetDir)
-            local installedShortcuts = installShortcut(repository.CurrentLocalPath, shortcutName, shortcutTargetDir)
+        repo.Remote = SupportedRemotes.Github
+        repo.Owner = "seesberger"
+        repo.Name = "PowerManager"
+        repo.RepoIdentifier = "seesberger/PowerManager"
+        repo.CurrentRef = "master"
+        repo.CurrentLocalPath = ""
 
-            --- remove temporary files and create manifest for later uninstall
-            removeDownloads(downloadTargetDir, downloadedFiles)
-            createManifest(installedDependencies, installedFiles, installedShortcuts, manifestTarget, repository.Name)
-        end
-        --- ask user about repo
-        if askYesOrNoQuestion("Use default config? (github::seesberger/PowerManager)?",YES,NO,true) == true then
-            repo = DefaultRepository
-            --- ask user about shortcutname
-            if askYesOrNoQuestion("Use default shortcut name \"powerman\"?",YES,NO,true) then shortcutName = "powerman" end
-            runFullInstallTask(repo, shortcutName)
-        else print("other things not implemented yet") end
+        --- 1. download the actual repo. This will update repo to reflect config in the installconfig, like the shortcut name
+        print("downloading "..repo.RepoIdentifier.." from "..repo.Remote.Name)
+        local downloadTargetDir = Defaults.TemporaryDownloadPath..repo.RepoIdentifier
+        local downloadedFiles = downloadRepo(repo,false,downloadTargetDir)
+        local updatedPath = repo.CurrentLocalPath
+        local configfile = repo.CurrentLocalPath.."installconfig.lua"
+        local config, repoUpdated, deps = readInstallConfig(configfile)
+        repo = repoUpdated
+        repo.CurrentLocalPath = updatedPath
+
+        --- 2. find dependencies - if they exist, download and install them
+        local installedDependencies = installDependencies(deps)
+        --- 3. install the actual program
+
+        local installedFiles = installFiles(config, downloadTargetDir)
+        local installedShortcuts = installShortcut(repo.CurrentLocalPath, config.Installation.Shortcut.Source, config.Installation.Shortcut.Name, config.Installation.Shortcut.Target)
+
+        --- remove temporary files and create manifest for later uninstall
+        removeDownloads(downloadTargetDir, downloadedFiles)
+        createManifest(installedDependencies, installedFiles, installedShortcuts, Defaults.ManifestTarget, repo.Name)
     end
 
-    local function setupExperimentalCustomInstall()
+    local function runCustomInstall()
         if askYesOrNoQuestion("Are you sure about using experimental custom install?", YES, NO, false) then
             print("Asking some questions about repo to set up:")
-            --- remote setup
-            --- FIXME: default on ENTER is broken
+
+            local repo = Defaults.EmptyRepository
+
             local remoteAnswer = askTextQuestion("Github (default on ENTER) or Gitea?", "Github", {"Github", "Gitea"})
             if remoteAnswer == "Github" or remoteAnswer == "" then repo.Remote = SupportedRemotes.Github
             elseif remoteAnswer == "Gitea" then repo.Remote = SupportedRemotes.Gitea
             end
             --- owner and name -> repoIdentifier?
-            repo.Owner = askTextQuestion("Owner of Repo? (DEFAULT: TheRealRobin)", "TheRealRobin")
-            repo.Name = askTextQuestion("Name of Repo? (DEFAULT: oc-baserepo)", "oc-baserepo")
+            repo.Owner = askTextQuestion("Owner of Repo? (DEFAULT: seesberger)", "seesberger")
+            repo.Name = askTextQuestion("Name of Repo? (DEFAULT: PowerManager)", "PowerManager")
             repo.RepoIdentifier = askTextQuestion("Use "..repo.Owner.."/"..repo.Name.."? (ENTER) or type custom repo id: ", repo.Owner.."/"..repo.Name)
-            --- shortcut name?
-            repo.ShortName = askTextQuestion("How will the shortcut be called? (default baserepo): ", "baserepo")
-            --- branch name? todo implement downloaing tags
-            repo.CurrentBranch = askTextQuestion("please specify branch to download (default master): ", "master")
+            repo.CurrentRef = askTextQuestion("please specify ref to download (default master): ", "master")
             repo.CurrentLocalPath = ""
 
-            --- 1. download the actual repo.
-            --- 2. find dependencies - if then exist, download and install them
-            --- 3. install the actual program
-            local installTargetDir  = "/usr/"..repo.Name
-            local shortcutTargetDir = "/usr/bin/"
-            local downloadTargetDir = DefaultTemporaryDownloadPath..repo.RepoIdentifier
-            local manifestTarget = "/etc/manifest/" -- should maybe be "/home/.git-tool/"
-
-            --- FIXME FIXME FIXME
-            --- local installedDependencies = legacyInstallDependencies() --only for testing while new version not implemented yet
-            --- local installedDependencies = installDependencies(foundDependencies) <<--- This needs to happen after the repo has been downloaded. the repo will need to specify dependencies itself.
+            --- 1. download the actual repo. This will update repo to reflect config in the installconfig, like the shortcut name
             print("downloading "..repo.RepoIdentifier.." from "..repo.Remote.Name)
-            local downloadedFiles = downloadRepo(repo, repo.Remote, false, downloadTargetDir) --enable auto-overwrite in other situations still todo
-            local installedDependencies = installDependencies(repo)
+            local downloadTargetDir = Defaults.TemporaryDownloadPath..repo.RepoIdentifier
+            local downloadedFiles = downloadRepo(repo,false,downloadTargetDir)
+            local updatedPath = repo.CurrentLocalPath
+            local configfile = repo.CurrentLocalPath.."installconfig.lua"
+            local config, repoUpdated, deps = readInstallConfig(configfile)
+            repo = repoUpdated
+            repo.CurrentLocalPath = updatedPath
 
-            local installedFiles = installFiles(downloadedFiles, downloadTargetDir, installTargetDir)
-            local installedShortcuts = installShortcut(repo.CurrentLocalPath, repo.ShortName, shortcutTargetDir)
+            --- 2. find dependencies - if they exist, download and install them
+            local installedDependencies = installDependencies(deps)
+            --- 3. install the actual program
+
+            local installedFiles = installFiles(config, downloadTargetDir)
+            local installedShortcuts = installShortcut(repo.CurrentLocalPath, config.Installation.Shortcut.Source, config.Installation.Shortcut.Name, config.Installation.Shortcut.Target)
 
             --- remove temporary files and create manifest for later uninstall
             removeDownloads(downloadTargetDir, downloadedFiles)
-            createManifest(installedDependencies, installedFiles, installedShortcuts, manifestTarget, repo.Name)
+            createManifest(installedDependencies, installedFiles, installedShortcuts, Defaults.ManifestTarget, repo.Name)
         end
     end
 
@@ -488,17 +430,14 @@ local function run(cliArgs)
     end
 
     if #cliArgs<1 then
-        print("No Arguments given. For help, please check -h or --help")
+        bootstrapPowerman()
         return
     end
     if cliArgs[1] == "-h" then
         printHelpText()
         return
-    elseif cliArgs[1] == "-d" then
-        setupDefaultInstall()
-        return
-    elseif cliArgs[1] == "-x" then
-        setupExperimentalCustomInstall()
+    elseif cliArgs[1] == "-i" then
+        runCustomInstall()
         return
     elseif cliArgs[1] == "-u" then
         uninstallViaManifest()

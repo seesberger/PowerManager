@@ -1,1 +1,1 @@
-dofile("/usr/PowerManager/PowerManager.lua")
+dofile("/usr/bin/PowerManager/PowerManagerLegacy.lua")
