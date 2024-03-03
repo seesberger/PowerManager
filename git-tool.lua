@@ -221,13 +221,14 @@ local function installFiles(config, downloadTargetDir)
 
     for idx, file in pairs(filesToInstall) do
         local absoluteDownloadFilePath = downloadTargetDir.."/"..file
-        print(idx..": Installing File "..absoluteDownloadFilePath.." to target directory "..installTargetDir..file)
-        local fileExists = filesystem.exists(installTargetDir..file)
-        if fileExists and replace then filesystem.remove(installTargetDir..file) end
+        local fileInstallTarget = installTargetDir.."/"..file
+        print(idx..": Installing File "..absoluteDownloadFilePath.." to target "..fileInstallTarget)
+        local fileExists = filesystem.exists(fileInstallTarget)
+        if fileExists and replace then filesystem.remove(fileInstallTarget) end
         if replace or (replace == nil) then
             --- TODO @Freddy: Coole Animation hinzufügen
-            os.execute("cp "..absoluteDownloadFilePath.." "..installTargetDir..file)
-            table.insert(installedFiles, installTargetDir..file)
+            os.execute("cp "..absoluteDownloadFilePath.." "..fileInstallTarget)
+            table.insert(installedFiles, fileInstallTarget)
         else error("file not removed, but installation was cancelled - This might result in a broken install.") end
     end
     return installedFiles
