@@ -72,7 +72,7 @@ function systemButtons(application)
                 textColor = 0x0F0F0F,
                 text = "Settings",
                 onTouch = function()
-                    LaunchApplication(application, "/usr/PowerManager/applications/settings.lua")
+                    LaunchApplication(application, "/usr/bin/PowerManager/applications/settings.lua")
                 end
             },
             launchApplications = {
@@ -81,7 +81,7 @@ function systemButtons(application)
                 textColor = 0x0F0F0F,
                 text = "Launcher",
                 onTouch = function()
-                    LaunchApplication(application, "/usr/PowerManager/applications/launchApplications.lua")
+                    LaunchApplication(application, "/usr/bin/PowerManager/applications/launchApplications.lua")
                 end
             },
             closeAll = {

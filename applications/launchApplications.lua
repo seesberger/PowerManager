@@ -12,7 +12,7 @@ app = {
         title = "Launcher",
         taskBarIcon = "L",
 
-        inputDescription = "Looking in /usr/PowerManager/applications",
+        inputDescription = "Looking in /usr/bin/PowerManager/applications",
         filesystemDescription = "Input filename and enter or click desired File in List",
         inputDefaultText = "",
         inputPlaceholder = "Filename.lua",
@@ -72,7 +72,7 @@ app = {
             0x444444, 
             GUI.IO_MODE_FILE, 
             GUI.IO_MODE_FILE))
-        filesystem.workPath = "/usr/PowerManager/applications/"
+        filesystem.workPath = "/usr/bin/PowerManager/applications/"
         filesystem:updateFileList()
         filesystem.onItemSelected = function(path)
             --GUI.alert(path)
