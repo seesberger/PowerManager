@@ -13,7 +13,7 @@ Config = {
         Shortcut = {
             Source = "shortcut.lua",
             Name = "powerman",
-            Taregt = "/usr/bin/" -- target for file shortcut.lua
+            Target = "/usr/bin/" -- target for file shortcut.lua
         },
         TargetDirectory = "/usr/bin/powerman",
         Files = {
