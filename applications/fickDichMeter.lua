@@ -36,7 +36,7 @@ app = {
         local layout = windowObject:addChild(GUI.layout(1, 2, windowObject.width, windowObject.height, 1, 1))
 
         --here comes the Fick Dich!
-        local progressbarWindow1 = layout:addChild(GUI.progressBar(1, 1, layout.width, 0x3366CC, 0xEEEEEE, 0x000000, 50, true, true, "Fick-Dich-Meter: ", ""))
+        progressbarWindow1 = layout:addChild(GUI.progressBar(1, 1, layout.width, 0x3366CC, 0xEEEEEE, 0x000000, 50, true, true, "Fick-Dich-Meter: ", ""))
         local buttonProgressbarUp = layout:addChild(GUI.button(1, 1, layout.width, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "+++"))
         local buttonProgressbarDn = layout:addChild(GUI.button(1, 1, layout.width, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "---"))
 
@@ -53,7 +53,10 @@ app = {
 
     --function that is called periodically for example to update some values. (FIXME: Not implemented yet)
     runTask = function()
-        
+        if progressbarWindow1.value >= 100 then
+            progressbarWindow1.value = 0
+        end
+        progressbarWindow1.value = progressbarWindow1.value + 2
     end
 }
 return app
