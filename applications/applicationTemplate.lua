@@ -11,20 +11,26 @@ app = {
         backgroundColor = 0xFFFFFF,
         titleColor = 0x00FF00,
         title = "Application",
-        taskBarIcon = "A"
+        taskBarIcon = "A",
+        runTaskDelay = 5
     },
 
     --function that is called when application is being started.
     --needs parent application for eventHandler.
     initialize = function(application)
-        --first, create a Window
+        --first, create a Window and give it the config.
         local windowObject = createCustomWindow(
             application, 
             app.config.position[1],
             app.config.position[2],
             app.config.size[1],
-            app.config.size[2]
+            app.config.size[2],
+            nil,
+            app.runTask,
+            app.config.runTaskDelay,
+            app.onClose
         )
+
         --then give it the correct title and task bar "symbol"
         windowObject.title.text = app.config.title
         windowObject.taskBarIcon.text = app.config.taskBarIcon
@@ -37,9 +43,14 @@ app = {
         return windowObject
     end,
 
-    --function that is called periodically for example to update some values. (FIXME: Not implemented yet)
-    runTask = function()
-        --put it in
+    --function that is called each frame to update stuff. --FIXME: Maybe dont run every frame...
+    runTask = function(application)
+        --GUI.alert("Frame animation alert")
+    end,
+
+    --Stop services or save some settings. Is called on deletion of the application window.
+    onClose = function(application)
+        --what should be done?
     end
 }
 return app

@@ -10,7 +10,8 @@ app = {
         backgroundColor = 0xFFFFFF,
         titleColor = 0x00FF00,
         title = "Fick dich!",
-        taskBarIcon = "F"
+        taskBarIcon = "F",
+        runTaskDelay = 1
     },
 
     --function that is called when application is being started.
@@ -22,7 +23,11 @@ app = {
             app.config.position[1],
             app.config.position[2],
             app.config.size[1],
-            app.config.size[2]
+            app.config.size[2],
+            nil,
+            app.runTask,
+            app.config.runTaskDelay,
+            app.onClose
         )
         --then give it the correct title and task bar "symbol"
         windowObject.title.text = app.config.title
@@ -48,7 +53,7 @@ app = {
 
     --function that is called periodically for example to update some values. (FIXME: Not implemented yet)
     runTask = function()
-        --put it in
+        
     end
 }
 return app

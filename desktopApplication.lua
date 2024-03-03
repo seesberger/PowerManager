@@ -26,11 +26,11 @@ function systemButtons(application)
                     os.execute("reboot")
                 end
             },
-            restartGui = {
-                idleColor = 0x01FF00,
-                pressedColor = 0x0B0B0B,
+            restartDesktop = {
+                idleColor = 0x00FF00,
+                pressedColor = 0xBBBBBB,
                 textColor = 0x0F0F0F,
-                text = "Restart Program",
+                text = "Restart Desktop",
                 onTouch = function()
                     application:stop()
                     os.execute("powerman -gui")
@@ -43,8 +43,12 @@ function systemButtons(application)
                 textColor = 0x0F0F0F,
                 text = "Update",
                 onTouch = function()
-                    --FIXME: Change text color to mitigate unreadable text
-                    print("\27[101;93m Starting Updater...")
+                    application:removeChildren()
+                    application:addChild(GUI.panel(1, 1, application.width, application.height, backgroundColor))
+                    application:addChild(GUI.text(1, 1, 0xFFFFFF, "Updater init"))
+                    application:draw(true)
+                    application:stop()
+                    print("Starting Updater...")
                     os.execute("powerman -u -x")
                     print("Going back to GUI")
                     os.sleep(0.5)
@@ -78,6 +82,17 @@ function systemButtons(application)
                 text = "Launcher",
                 onTouch = function()
                     LaunchApplication(application, "/usr/PowerManager/applications/launchApplications.lua")
+                end
+            },
+            closeAll = {
+                idleColor = 0xFF0000,
+                pressedColor = 0xBBBBBB,
+                textColor = 0x0F0F0F,
+                text = "Close all Windows",
+                onTouch = function()
+                    for object in TaskBar.children do
+                        object.remove()
+                    end
                 end
             }
             --[[
@@ -138,14 +153,27 @@ end
 TaskBar = CreateTaskBar(application)
 
 --To be used on a windowed panel. (GUI.window)
-function createCustomWindow(application, x, y, width, height, elementsConfig)
+function createCustomWindow(application, x, y, width, height, elementsConfig, runTask, runTaskDelay, stopTask)
     x = x or #TaskBar.children + 10
     y = y or #TaskBar.children + 5
     width = width or 50
     height = height or 20
+    runTask = runTask or function() end
+    runTaskDelay = runTaskDelay or 5
+    stopTask = stopTask or function() end
 
     --Create window
     local windowObject = application:addChild(GUI.window(x, y, width, height))
+    --add the frame animation. When runTaskDelay is over runTask will be called.
+    windowObject.animationTask = windowObject:addAnimation(
+            function() end,
+            function()
+                --GUI.alert("DEBUG 171")
+                runTask()
+                windowObject.animationTask:start(runTaskDelay)
+            end
+        )
+    windowObject.animationTask:start(runTaskDelay)
 
     elementsConfig = elementsConfig or {
         minimizeButton = {
@@ -163,7 +191,7 @@ function createCustomWindow(application, x, y, width, height, elementsConfig)
             idleColor = 0x000000B,
             pressedColor = 0x888800,
             textColor = 0xFFFFFF,
-            text = "placeholder",
+            text = "",
             onTouch = function() windowObject:minimize() end,
             create = function() 
                 --create object to extend taskBar entries
@@ -185,8 +213,9 @@ function createCustomWindow(application, x, y, width, height, elementsConfig)
             textColor = 0xFFFFFF,
             text = "Exit",
             onTouch = function() 
-                --remove task bar icon and close thing
+                --remove task bar icon, stop animationTask and close thing
                 windowObject.taskBarIcon:remove()
+                windowObject.animationTask:stop()
                 windowObject:close() 
             end
         },
@@ -195,7 +224,7 @@ function createCustomWindow(application, x, y, width, height, elementsConfig)
             backgroundColor = 0x0000BB,
             textColor = 0xFFFFFF,
             text = "Title"
-        }
+        },
     }
     
     --insert link to self into the TaskBar object
@@ -232,8 +261,10 @@ function LaunchApplication(application, filePath)
     local file = dofile(filePath)
     --most applications should return their window object pointer.
     local initReturn = file.initialize(application)
+    --local runTask = file.runTask(application)
+    --local onClose = file.onClose(application)
     --table.insert(RunTasks, file.runTask)
-    return file, initReturn
+    return file, initReturn--, onClose
 end
 
 application:draw(true)
