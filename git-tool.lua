@@ -212,12 +212,13 @@ end
 
 local function installFiles(config, downloadTargetDir)
     local installedFiles = {}
-    local installTargetDir = config.Installation.TargetDirectory
+    local installTargetDir = config.Installation.TargetDirectory.Main
     local filesToInstall = config.Installation.Files
     
     --- FIXME: ask user about replacing files.
     local replace = true
     makeDirIfNotExists(installTargetDir)
+    for idx, subdir in pairs(config.Installation.TargetDirectory.Subdirs) do makeDirIfNotExists(subdir) end
 
     for idx, file in pairs(filesToInstall) do
         local absoluteDownloadFilePath = downloadTargetDir.."/"..file
@@ -264,6 +265,7 @@ local function installDependencies(dependencies)
         elseif dependency.Type == "Repository" then
             print("Dependency with type Repository skipped, not Implemented")
             --- TODO: Recursive run git-tool
+        else error("Dependency.Type seems malformed. Please check installconfig.lua for errors")
         end
     end
 
