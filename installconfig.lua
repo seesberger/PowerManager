@@ -29,7 +29,9 @@ Config = {
             "applications/applicationTemplate.lua",
             "applications/energyCellReadout.lua",
             "applications/fickDichMeter.lua",
-            "applications/settings.lua"
+            "applications/settings.lua",
+            "applications/launchApplications.lua",
+            "applications/fileReader.lua"
         }
     }
 }
