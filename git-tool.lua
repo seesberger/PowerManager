@@ -353,7 +353,35 @@ end
 local function run(cliArgs)
 
     local function bootstrapPowerman()
-        
+        local repo = Defaults.EmptyRepository
+
+        repo.Remote = SupportedRemotes.Github
+        repo.Owner = "seesberger"
+        repo.Name = "PowerManager"
+        repo.RepoIdentifier = "seesberger/PowerManager"
+        repo.CurrentRef = "master"
+        repo.CurrentLocalPath = ""
+
+        --- 1. download the actual repo. This will update repo to reflect config in the installconfig, like the shortcut name
+        print("downloading "..repo.RepoIdentifier.." from "..repo.Remote.Name)
+        local downloadTargetDir = Defaults.TemporaryDownloadPath..repo.RepoIdentifier
+        local downloadedFiles = downloadRepo(repo,false,downloadTargetDir)
+        local updatedPath = repo.CurrentLocalPath
+        local configfile = repo.CurrentLocalPath.."installconfig.lua"
+        local config, repoUpdated, deps = readInstallConfig(configfile)
+        repo = repoUpdated
+        repo.CurrentLocalPath = updatedPath
+
+        --- 2. find dependencies - if they exist, download and install them
+        local installedDependencies = installDependencies(deps)
+        --- 3. install the actual program
+
+        local installedFiles = installFiles(config, downloadTargetDir)
+        local installedShortcuts = installShortcut(repo.CurrentLocalPath, config.Installation.Shortcut.Source, config.Installation.Shortcut.Name, config.Installation.Shortcut.Target)
+
+        --- remove temporary files and create manifest for later uninstall
+        removeDownloads(downloadTargetDir, downloadedFiles)
+        createManifest(installedDependencies, installedFiles, installedShortcuts, Defaults.ManifestTarget, repo.Name)
     end
 
     local function setupExperimentalCustomInstall()
