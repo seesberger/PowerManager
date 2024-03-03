@@ -111,7 +111,6 @@ local function downloadRepo(repository, autoOverride, targetDownloadPath)
 
     --- FIXME: If download only mode is enabled, set this to /home. still todo
     repository.CurrentLocalPath = targetDownloadPath.."/" --- set globally used path for current fs operations
-    print("--DEBUG 118: "..targetDownloadPath)
     local success, res = pcall(makeDirIfNotExists, targetDownloadPath)
     if not success then error("the download failed because of filesystem errors.") end
 
@@ -219,14 +218,17 @@ local function downloadRepo(repository, autoOverride, targetDownloadPath)
     if success then print("All files downloaded successfully.") return res else error(res) end
 end
 
-local function installFiles(config)
+local function installFiles(config, downloadTargetDir)
     local installedFiles = {}
+    local installTargetDir = config.Installation.TargetDirectory
+    local filesToInstall = config.Installation.Files
     
     --- FIXME: ask user about replacing files.
     local replace = true
     makeDirIfNotExists(installTargetDir)
-    for idx, file in pairs(downloadedFiles) do
-        local absoluteDownloadFilePath = downloadTargetDir.."/"..file:sub(2,-1)
+
+    for idx, file in pairs(filesToInstall) do
+        local absoluteDownloadFilePath = downloadTargetDir.."/"..file
         print(idx..": Installing File "..absoluteDownloadFilePath.." to target directory "..installTargetDir..file)
         local fileExists = filesystem.exists(installTargetDir..file)
         if fileExists and replace then filesystem.remove(installTargetDir..file) end
@@ -239,32 +241,36 @@ local function installFiles(config)
     return installedFiles
 end
 
-local function installShortcut(currentRepoPath, shortcutName, targetDir)
+local function installShortcut(currentRepoPath, sourceFile, shortcutName, targetDir)
     print("installing shortcut...")
     makeDirIfNotExists(targetDir)
-    local currentTarget = currentRepoPath.."shortcut.lua"
+    local currentTarget = currentRepoPath..sourceFile
     local shortcutInstallTarget = targetDir..shortcutName..".lua"
     os.execute("mv "..currentTarget.." "..shortcutInstallTarget)
     return {shortcutInstallTarget}
 end
 
 local function installDependencies(dependencies)
-    print("Getting information about dependencies of installation candidate")
-    ---reads the dependency file to create a list of dependencies: {{"url1","installpath1"},{"url2","installpath2"}} 
-    
+    print("Preparing dependency install...")
+
     local function installDependency(dependency)
         print("Installing "..dependency.Name)
         --Check for scripts contained in dependencies and execute it. Makes the thn a bit more versatile
         if dependency.Type == "Script" then
-            dependency.InstallScript(repository.CurrentLocalPath, Defaults.LibraryPath)
+            -- FIXME how to get correct args for script? or disallow args
+            --            dependency.InstallScript(repository.CurrentLocalPath, Defaults.LibraryPath)
+            print("Dependency with type Script skipped, not Implemented")
         elseif dependency.Type == "InstallFiles" then
             local targets = ""
             for idx, file in pairs(dependency.Files) do
+                if file.MakeDir then makeDirIfNotExists(file.MakeDir) end
                 os.execute("wget -f "..file.URL.." "..file.Target)
                 targets = targets..file.Target.."\n"
             end
             return targets
-        else
+        elseif dependency.Type == "Repository" then
+            print("Dependency with type Repository skipped, not Implemented")
+            --- TODO: Recursive run git-tool
         end
     end
 
@@ -385,14 +391,13 @@ local function run(cliArgs)
             --- 2. find dependencies - if they exist, download and install them
             local installedDependencies = installDependencies(deps)
             --- 3. install the actual program
-            local installTargetDir  = Defaults.InstallationPath..repo.Name
 
-            local installedFiles = installFiles(config)
-            local installedShortcuts = installShortcut(repo.CurrentLocalPath, repo.ShortName, shortcutTargetDir)
+            local installedFiles = installFiles(config, downloadTargetDir)
+            local installedShortcuts = installShortcut(repo.CurrentLocalPath, config.Installation.Shortcut.Source, config.Installation.Shortcut.Name, config.Installation.Shortcut.Target)
 
             --- remove temporary files and create manifest for later uninstall
             removeDownloads(downloadTargetDir, downloadedFiles)
-            createManifest(installedDependencies, installedFiles, installedShortcuts, manifestTarget, repo.Name)
+            createManifest(installedDependencies, installedFiles, installedShortcuts, Defaults.ManifestTarget, repo.Name)
         end
     end
 
@@ -408,9 +413,6 @@ local function run(cliArgs)
     end
     if cliArgs[1] == "-h" then
         printHelpText()
-        return
-    elseif cliArgs[1] == "-d" then
-        setupDefaultInstall()
         return
     elseif cliArgs[1] == "-x" then
         setupExperimentalCustomInstall()
