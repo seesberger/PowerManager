@@ -24,6 +24,7 @@ Config = {
             "git-tool.lua",
             "main.lua",
             "settings.lua",
+            "PowerManagerLegacy.lua",
             "applications/applications.lua",
             "applications/applicationTemplate.lua",
             "applications/energyCellReadout.lua",
