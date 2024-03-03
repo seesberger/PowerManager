@@ -5,7 +5,7 @@ app = {
     --Global application config
     --extend as you wish.
     config = {
-        position = {50, 10},
+        position = {},
         size = {80, 30},
         backgroundColor = 0xFFFFFF,
         titleColor = 0x00FF00,
@@ -26,12 +26,12 @@ app = {
         )
         --then give it the correct title and task bar "symbol"
         windowObject.title.text = app.config.title
-        windowObject.taskBarIcon.text = app.config.taskBarIcons
+        windowObject.taskBarIcon.text = app.config.taskBarIcon
         --add a layout container to adaptively add content or remove it and let the content be hardcoded.
         local layout = windowObject:addChild(GUI.layout(1, 2, windowObject.width, windowObject.height, 1, 1))
 
         --here comes the Fick Dich!
-        local progressbarWindow1 = layout:addChild(GUI.progressBar(1, 1, layout.width, 0x3366CC, 0xEEEEEE, 0x000000, 50, true, true, "Fick-Dich-Meter: ", " "))
+        local progressbarWindow1 = layout:addChild(GUI.progressBar(1, 1, layout.width, 0x3366CC, 0xEEEEEE, 0x000000, 50, true, true, "Fick-Dich-Meter: ", ""))
         local buttonProgressbarUp = layout:addChild(GUI.button(1, 1, layout.width, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "+++"))
         local buttonProgressbarDn = layout:addChild(GUI.button(1, 1, layout.width, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "---"))
 

@@ -3,7 +3,7 @@ local GUI = require("GUI")
 app = {
     --Global application config
     config = {
-        position = {2, 2},
+        position = {},
         size = {80, 30},
         backgroundColor = 0xFFFFFF,
         titleColor = 0x00FF00,

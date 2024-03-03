@@ -1,6 +1,9 @@
---dofile("filepath") to load settings
+--settings application
 
 settings = {
+    config = {
+
+    }
     
 }
 

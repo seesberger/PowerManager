@@ -10,8 +10,6 @@ BackgroundPanel = application:addChild(GUI.panel(1, 1, application.width, applic
 --stores the tasks that are being called periodically
 RunTasks = {}
 
---FIXME: just used for legacy spawnWindow. Is quite janky and needed no more. leaving it in for debugging.
-activeWindows = {}
 function systemButtons(application)
     local systemButtonConfig = {
         position = { 1, 1},
@@ -46,23 +44,13 @@ function systemButtons(application)
                 text = "Update",
                 onTouch = function()
                     --FIXME: Change text color to mitigate unreadable text
-                    os.execute("cls")
-                    print("Starting Updater...")
+                    print("\27[101;93m Starting Updater...")
                     os.execute("powerman -u -x")
                     print("Going back to GUI")
                     os.sleep(0.5)
                     os.execute("powerman -gui")
+                    --graceful Exit
                     os.exit()
-                end
-            },
-            spawnWindow = {
-                idleColor = 0xFFFFFF,
-                pressedColor = 0xBBBBBB,
-                textColor = 0x0F0F0F,
-                text = "Spawn Window",
-                onTouch = function()
-                    window = createCustomWindow(application, #activeWindows + 3, 2 + #activeWindows + 3)
-                    table.insert(activeWindows, window)
                 end
             },
             stopGui = {
@@ -83,22 +71,13 @@ function systemButtons(application)
                     LaunchApplication(application, "/usr/PowerManager/applications/settings.lua")
                 end
             },
-            openTemplate = {
+            launchApplications = {
                 idleColor = 0xFFFFFF,
                 pressedColor = 0xBBBBBB,
                 textColor = 0x0F0F0F,
-                text = "TemplateApp",
+                text = "Launcher",
                 onTouch = function()
-                    LaunchApplication(application, "/usr/PowerManager/applications/applicationTemplate.lua")
-                end
-            },
-            openfickDich = {
-                idleColor = 0xFFFFFF,
-                pressedColor = 0xBBBBBB,
-                textColor = 0x0F0F0F,
-                text = "Fick Dich!",
-                onTouch = function()
-                    LaunchApplication(application, "/usr/PowerManager/applications/fickDichMeter.lua")
+                    LaunchApplication(application, "/usr/PowerManager/applications/launchApplications.lua")
                 end
             }
             --[[
@@ -152,7 +131,7 @@ function CreateTaskBar(application, config)
     
     local taskBar = application:addChild(GUI.container(1, application.height - 2, application.width, 3))
     taskBar:addChild(GUI.panel(1, 1, taskBar.width, taskBar.height, config.backgroundColor))
-    layoutTaskBar = taskBar:addChild(GUI.layout(1, 1, taskBar.width, taskBar.height, 1, 1))
+    local layoutTaskBar = taskBar:addChild(GUI.layout(1, 1, taskBar.width, taskBar.height, 1, 1))
     layoutTaskBar:setDirection(1, 1, GUI.DIRECTION_HORIZONTAL)
     return layoutTaskBar
 end
@@ -160,8 +139,8 @@ TaskBar = CreateTaskBar(application)
 
 --To be used on a windowed panel. (GUI.window)
 function createCustomWindow(application, x, y, width, height, elementsConfig)
-    x = x or 90
-    y = y or 10
+    x = x or #TaskBar.children + 10
+    y = y or #TaskBar.children + 5
     width = width or 50
     height = height or 20
 
