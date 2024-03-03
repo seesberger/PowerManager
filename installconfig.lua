@@ -72,7 +72,7 @@ Dependencies = {
                 Target = "/lib/image.lua"
             },{
                 URL = "https://raw.githubusercontent.com/seesberger/OpenComputers-GUI/master/color.lua",
-                Target = "/lib/doubleBuffering.lua"
+                Target = "/lib/color.lua"
             },{
                 URL = "https://raw.githubusercontent.com/seesberger/OpenComputers-GUI/master/advancedLua.lua",
                 Target = "/lib/advancedLua.lua"

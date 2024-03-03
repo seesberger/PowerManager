@@ -40,8 +40,6 @@ Defaults = {
     }
 }
 
-
-
 local function askYesOrNoQuestion(question, expectedTrue, expectedFalse, defaultYesOnEnter)
     local function checkContains(array,value)
         for idx, val in pairs(array) do
@@ -345,7 +343,7 @@ local function printHelpText()
     "Usage:\n" ..
     "updater <option>  - no args: default bootstrap install of powerman\n"..
     "  '' -h         - this help text\n"..
-    "  '' -x         - install custom repository (experimental)\n"..
+    "  '' -i         - install custom repository\n"..
     "  '' -u         - uninstall via manifest"
     print(helpText)
 end
@@ -353,6 +351,7 @@ end
 local function run(cliArgs)
 
     local function bootstrapPowerman()
+        print("Installing PowerMan from Github (master) with default settings")
         local repo = Defaults.EmptyRepository
 
         repo.Remote = SupportedRemotes.Github
@@ -384,7 +383,7 @@ local function run(cliArgs)
         createManifest(installedDependencies, installedFiles, installedShortcuts, Defaults.ManifestTarget, repo.Name)
     end
 
-    local function setupExperimentalCustomInstall()
+    local function runCustomInstall()
         if askYesOrNoQuestion("Are you sure about using experimental custom install?", YES, NO, false) then
             print("Asking some questions about repo to set up:")
 
@@ -437,8 +436,8 @@ local function run(cliArgs)
     if cliArgs[1] == "-h" then
         printHelpText()
         return
-    elseif cliArgs[1] == "-x" then
-        setupExperimentalCustomInstall()
+    elseif cliArgs[1] == "-i" then
+        runCustomInstall()
         return
     elseif cliArgs[1] == "-u" then
         uninstallViaManifest()
