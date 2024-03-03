@@ -431,7 +431,7 @@ local function run(cliArgs)
     end
 
     if #cliArgs<1 then
-        print("No Arguments given. For help, please check -h or --help")
+        bootstrapPowerman()
         return
     end
     if cliArgs[1] == "-h" then
