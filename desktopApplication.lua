@@ -48,11 +48,14 @@ function systemButtons(application)
                     application:addChild(GUI.text(1, 1, 0xFFFFFF, "Updater init"))
                     application:draw(true)
                     application:stop()
+                    --FIXME: There has to be a right way of doing it.
+                    print("Moving git tool")
+                    os.execute("cp /usr/bin/PowerManager/git-tool.lua /home/git.lua")
                     print("Removing old files...")
                     --powerman -*u*pdater -*u*ninstall
                     os.execute("powerman -u -u")
                     print("Done removing. Going to bootstrap...")
-                    os.execute("powerman -u")
+                    os.execute("/home/git.lua")
                     print("Going back to GUI")
                     os.sleep(0.5)
                     os.execute("powerman -gui")
@@ -75,7 +78,7 @@ function systemButtons(application)
                 textColor = 0x0F0F0F,
                 text = "Settings",
                 onTouch = function()
-                    LaunchApplication(application, "/usr/bin/PowerManager/applications/settings.lua")
+                    LaunchApplication(application, "/usr/bin/PowerManager/applications/settingsApplication.lua")
                 end
             },
             launchApplications = {
@@ -93,7 +96,7 @@ function systemButtons(application)
                 textColor = 0x0F0F0F,
                 text = "Close all Windows",
                 onTouch = function()
-                    for object in TaskBar.children do
+                    for idx, object in ipairs(TaskBar.children) do
                         object.remove()
                     end
                 end
