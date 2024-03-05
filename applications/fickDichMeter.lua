@@ -15,7 +15,7 @@ app = {
     },
 
     values = {
-
+        fickDichZaehler = 0,
     },
 
     --function that is called when application is being started.
@@ -45,12 +45,14 @@ app = {
         app.values.progressbarWindow1 = layout:addChild(GUI.progressBar(1, 1, layout.width - 2, 0x3366CC, 0xEEEEEE, 0x000000, 50, true, true, "Fick-Dich-Meter: ", ""))
         local buttonProgressbarUp = layout:addChild(GUI.button(1, 1, layout.width, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "+++"))
         local buttonProgressbarDn = layout:addChild(GUI.button(1, 1, layout.width, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "---"))
-
+        app.values.fickDichText = layout:addChild(GUI.text(1, 1, 0x000000, "Fick dich: "..app.values.fickDichZaehler.." mal!"))
         buttonProgressbarUp.onTouch = function()
             app.values.progressbarWindow1.value = app.values.progressbarWindow1.value + 5
+            app.values.fickDichZaehler = app.values.fickDichZaehler + 2
         end
         buttonProgressbarDn.onTouch = function()
-            app.values.progressbarWindow1.value = app.values.progressbarWindow1.value + 5
+            app.values.progressbarWindow1.value = app.values.progressbarWindow1.value - 5
+            app.values.fickDichZaehler = app.values.fickDichZaehler + 2
         end
 
         --return the Application window as object.
@@ -63,6 +65,8 @@ app = {
             app.values.progressbarWindow1.value = 0
         end
         app.values.progressbarWindow1.value = app.values.progressbarWindow1.value + 2
+        app.values.fickDichZaehler = app.values.fickDichZaehler + 1
+        app.values.fickDichText.text = "Fick dich: "..app.values.fickDichZaehler.." mal!"
     end
 }
 return app
