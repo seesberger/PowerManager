@@ -97,7 +97,7 @@ function systemButtons(application)
                 text = "Close all Windows",
                 onTouch = function()
                     for idx, object in ipairs(TaskBar.children) do
-                        object.remove()
+                        --object.remove()
                     end
                 end
             }
