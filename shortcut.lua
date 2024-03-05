@@ -6,13 +6,13 @@ local helpText = "This sophisticated toolset comes packed with a few features: \
                  "Usages:\n"..
                  "powerman              - no args: starts the GUI\n"..
                  "   '' -h              - this help text\n" .. 
-                 "   '' -gui            - executes the given file in the Application folder\n"..
+                 "   '' -legacy         - Legacy application\n"..
                  "   '' -u              - starts the git-tool\n"..
                  "   '' -exe [filename] - executes the given file in the Application folder\n"..
                  "   '' -arb [command]  - executes an arbitrary function that is yet to be defined"
 
 if #args<1 then
-    dofile("/usr/bin/PowerManager/main.lua")
+    dofile("/usr/bin/PowerManager/desktopApplication.lua")
     return
 end
 
