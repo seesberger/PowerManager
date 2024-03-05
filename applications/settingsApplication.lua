@@ -52,7 +52,7 @@ app = {
         descriptions = descriptions or {}
         for idx, v in ipairs(settings) do
             if type(v) == "table" then
-                local col = layout:addColumn(GUI.SIZE_POLICY_ABSOLUTE, #v.identifier)
+                local col = layout:addColumn(GUI.SIZE_POLICY_RELATIVE, 1)
                 col:addChild(GUI.text(1, 1, 0x000000, v.identifier))
                 app.createSettingsTable(col, v.contents)
             else

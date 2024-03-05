@@ -14,6 +14,10 @@ app = {
         runTaskDelay = 1
     },
 
+    values = {
+
+    },
+
     --function that is called when application is being started.
     --needs parent application for eventHandler.
     initialize = function(application)
@@ -31,20 +35,22 @@ app = {
         )
         --then give it the correct title and task bar "symbol"
         windowObject.title.text = app.config.title
+        windowObject.titleBar.color = app.config.titleColor
+        windowObject.background.color = app.config.backgroundColor
         windowObject.taskBarIcon.text = app.config.taskBarIcon
         --add a layout container to adaptively add content or remove it and let the content be hardcoded.
-        local layout = windowObject:addChild(GUI.layout(1, 2, windowObject.width, windowObject.height, 1, 1))
+        local layout = windowObject:addChild(GUI.layout(1, 1, windowObject.width, windowObject.height, 1, 1))
 
         --here comes the Fick Dich!
-        progressbarWindow1 = layout:addChild(GUI.progressBar(1, 1, layout.width, 0x3366CC, 0xEEEEEE, 0x000000, 50, true, true, "Fick-Dich-Meter: ", ""))
+        app.values.progressbarWindow1 = layout:addChild(GUI.progressBar(1, 1, layout.width - 2, 0x3366CC, 0xEEEEEE, 0x000000, 50, true, true, "Fick-Dich-Meter: ", ""))
         local buttonProgressbarUp = layout:addChild(GUI.button(1, 1, layout.width, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "+++"))
         local buttonProgressbarDn = layout:addChild(GUI.button(1, 1, layout.width, 3, 0xB4B4B4, 0xFFFFFF, 0x969696, 0xB4B4B4, "---"))
 
         buttonProgressbarUp.onTouch = function()
-            progressbarWindow1.value = progressbarWindow1.value + 5
+            app.values.progressbarWindow1.value = app.values.progressbarWindow1.value + 5
         end
         buttonProgressbarDn.onTouch = function()
-            progressbarWindow1.value = progressbarWindow1.value - 5
+            app.values.progressbarWindow1.value = app.values.progressbarWindow1.value + 5
         end
 
         --return the Application window as object.
@@ -53,10 +59,10 @@ app = {
 
     --function that is called periodically for example to update some values. (FIXME: Not implemented yet)
     runTask = function()
-        if progressbarWindow1.value >= 100 then
-            progressbarWindow1.value = 0
+        if app.values.progressbarWindow1.value >= 100 then
+            app.values.progressbarWindow1.value = 0
         end
-        progressbarWindow1.value = progressbarWindow1.value + 2
+        app.values.progressbarWindow1.value = app.values.progressbarWindow1.value + 2
     end
 }
 return app

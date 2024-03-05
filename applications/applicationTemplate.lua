@@ -31,8 +31,10 @@ app = {
             app.onClose
         )
 
-        --then give it the correct title and task bar "symbol"
+        --then give it the correct title and stuff
         windowObject.title.text = app.config.title
+        windowObject.titleBar.color = app.config.titleColor
+        windowObject.background.color = app.config.backgroundColor
         windowObject.taskBarIcon.text = app.config.taskBarIcon
         --add a layout container to adaptively add content or remove it and let the content be hardcoded.
         local layout = windowObject:addChild(GUI.layout(1, 2, windowObject.width, windowObject.height, 1, 1))

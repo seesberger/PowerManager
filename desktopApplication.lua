@@ -51,10 +51,10 @@ function systemButtons(application)
                     --FIXME: There has to be a right way of doing it.
                     print("Moving git tool")
                     os.execute("cp /usr/bin/PowerManager/git-tool.lua /home/git.lua")
-                    print("Removing old files...")
+                    --print("Removing old files...")
                     --powerman -*u*pdater -*u*ninstall
-                    os.execute("powerman -u -u")
-                    print("Done removing. Going to bootstrap...")
+                    --os.execute("powerman -u -u")
+                    --print("Done removing. Going to bootstrap...")
                     os.execute("/home/git.lua")
                     print("Going back to GUI")
                     os.sleep(0.5)
@@ -236,8 +236,8 @@ function createCustomWindow(application, x, y, width, height, elementsConfig, ru
     --insert link to self into the TaskBar object
     windowObject.taskBarIcon = elementsConfig.taskBarIcon.create()
     
-    windowObject:addChild(GUI.panel(1, 1, windowObject.width, windowObject.height, 0xF0F0F0))
-    windowObject:addChild(GUI.panel(1, 1, windowObject.width, elementsConfig.titleBar.height, elementsConfig.titleBar.backgroundColor))
+    windowObject.background = windowObject:addChild(GUI.panel(1, 1, windowObject.width, windowObject.height, 0xF0F0F0))
+    windowObject.titleBar = windowObject:addChild(GUI.panel(1, 1, windowObject.width, elementsConfig.titleBar.height, elementsConfig.titleBar.backgroundColor))
     windowObject.title = windowObject:addChild(GUI.label(2, 1, windowObject.width, elementsConfig.titleBar.height, elementsConfig.titleBar.textColor, elementsConfig.titleBar.text))
     windowObject.minimizer = windowObject:addChild(GUI.adaptiveButton( 
                 windowObject.width - (#elementsConfig.closeButton.text + #elementsConfig.minimizeButton.text + 4),
@@ -262,8 +262,7 @@ function createCustomWindow(application, x, y, width, height, elementsConfig, ru
 end
 
 function LaunchApplication(application, filePath)
-    --TODO: Add run method to methods being periodically called by eventHandler.
-    --ALSO: Make it so missing apps dont crash the GUI. (pcall?)
+    --TODO: Make it so missing apps dont crash the GUI. (pcall?)
     local file = dofile(filePath)
     --most applications should return their window object pointer.
     local initReturn = file.initialize(application)
