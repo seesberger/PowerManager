@@ -4,7 +4,7 @@ app = {
     --Global application config
     config = {
         position = {},
-        size = {80, 30},
+        size = {120, 35},
         backgroundColor = 0xFFFFFF,
         titleColor = 0x00FF00,
         title = "Settings",
@@ -86,7 +86,7 @@ app = {
         local submitButton = layout:addChild(GUI.button(
             1, 1, 
             app.config.size[1], 
-            app.config.size[2], 
+            3, 
             0xFFFFFF, 0x555555, 0x880000, 0xFFFFFF, 
             "Submit values"))
         submitButton.animated = false
