@@ -6,7 +6,7 @@ backgroundColor = 0x000000
 --start full screen application
 local application = GUI.application()
 -- Whole Screen application
-BackgroundPanel = application:addChild(GUI.panel(1, 1, application.width, application.height, backgroundColor))
+BackgroundPanel = application:addChild(GUI.panel(1, 3, application.width, application.height - 6, backgroundColor))
 --stores the tasks that are being called periodically
 RunTasks = {}
 
@@ -157,6 +157,27 @@ function CreateTaskBar(application, config)
     return layoutTaskBar
 end
 TaskBar = CreateTaskBar(application)
+
+function LoadApplications(path)
+    local files = {}
+    for file in io.popen('ls "'..path..'"'):lines() do
+        if file:match("%.lua$") then
+            table.insert(files, file)
+        end
+    end
+    return files
+end
+
+function CreateDesktopIcons(application)
+    local applicationFilepath = "/usr/bin/PowerManager/applications/"
+    local layout = BackgroundPanel:addChild(GUI.layout(1, 1, BackgroundPanel.width, BackgroundPanel.height, 16, 1))
+    for app in LoadApplications(applicationFilepath) do
+        layout:addChild(GUI.adaptiveButton(2, 2, 30, 3, 0xFFFFFF, 0x555555, 0x880000, 0xFFFFFF, app)).onTouch = function()
+            LaunchApplication(application, applicationFilepath..app)
+        end
+    end
+end
+CreateDesktopIcons(application)
 
 --To be used on a windowed panel. (GUI.window)
 function createCustomWindow(application, x, y, width, height, elementsConfig, runTask, runTaskDelay, stopTask)

@@ -15,7 +15,7 @@ app = {
     },
 
     values = {
-        fickDichZaehler = 0,
+        fickDichZaehler = 0
     },
 
     --function that is called when application is being started.
