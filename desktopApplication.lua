@@ -170,7 +170,7 @@ end
 
 function CreateDesktopIcons(application)
     local applicationFilepath = "/usr/bin/PowerManager/applications/"
-    local layout = BackgroundPanel:addChild(GUI.layout(1, 1, BackgroundPanel.width, BackgroundPanel.height, 16, 1))
+    local layout = application:addChild(GUI.layout(1, 3, application.width, application.height - 6, 16, 1))
     for app in LoadApplications(applicationFilepath) do
         layout:addChild(GUI.adaptiveButton(2, 2, 30, 3, 0xFFFFFF, 0x555555, 0x880000, 0xFFFFFF, app)).onTouch = function()
             LaunchApplication(application, applicationFilepath..app)
