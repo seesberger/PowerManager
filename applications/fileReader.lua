@@ -43,7 +43,7 @@ app = {
         --add a layout container to adaptively add content or remove it and let the content be hardcoded.
         local layout = windowObject:addChild(GUI.layout(1, 2, windowObject.width, windowObject.height, 1, 1))
 
-        layout:addChild(GUI.text(1, 1, app.config.inputTextColor, app.config.filesystemDescription))
+        local description = layout:addChild(GUI.text(1, 1, app.config.inputTextColor, app.config.filesystemDescription))
         local filesystem = layout:addChild(GUI.filesystemTree(1, 1, 
             app.config.inputWidht, 
             app.config.inputHeight, 
@@ -90,6 +90,13 @@ app = {
 
         end
         filesystem.onItemSelected = function(path)
+            description:remove()
+            layout:addChild(GUI.adaptiveButton(1, 1, 1, 1, 0xFFFFFF, 0x555555, 0x880000, 0xFFFFFF, "Choose file")).onTouch = function()
+                windowObject.taskBarIcon:remove()
+                windowObject.animationTask:stop()
+                windowObject:close() 
+                LaunchApplication(application, "/usr/bin/PowerManager/application/fileReader.lua")
+            end
             filesystem:remove()
             createCodeView(path)
         end

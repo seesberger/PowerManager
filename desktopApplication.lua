@@ -6,7 +6,7 @@ backgroundColor = 0x000000
 --start full screen application
 local application = GUI.application()
 -- Whole Screen application
-BackgroundPanel = application:addChild(GUI.panel(1, 3, application.width, application.height - 6, backgroundColor))
+BackgroundPanel = application:addChild(GUI.panel(1, 3, application.width, application.height - 5, backgroundColor))
 --stores the tasks that are being called periodically
 RunTasks = {}
 
@@ -170,10 +170,10 @@ end
 
 function CreateDesktopIcons(application)
     local applicationFilepath = "/usr/bin/PowerManager/applications/"
-    local layoutDesktop = application:addChild(GUI.layout(1, 3, application.width, application.height - 6, 1, 1))
+    local layoutDesktop = application:addChild(GUI.layout(1, 3, application.width, application.height - 5, 1, 1))
     local apps = LoadApplications(applicationFilepath)
     for _, app in pairs(apps) do
-        layoutDesktop:addChild(GUI.adaptiveButton(1, 1, 0, 1, 0xFFFFFF, 0x555555, 0x880000, 0xFFFFFF, app)).onTouch = function()
+        layoutDesktop:addChild(GUI.adaptiveButton(1, 1, 1, 1, 0xFFFFFF, 0x555555, 0x880000, 0xFFFFFF, app)).onTouch = function()
             LaunchApplication(application, applicationFilepath..app)
         end
     end
