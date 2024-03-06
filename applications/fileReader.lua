@@ -95,7 +95,7 @@ app = {
                 windowObject.taskBarIcon:remove()
                 windowObject.animationTask:stop()
                 windowObject:close() 
-                LaunchApplication(application, "/usr/bin/PowerManager/application/fileReader.lua")
+                LaunchApplication(application, "/usr/bin/PowerManager/applications/fileReader.lua")
             end
             filesystem:remove()
             createCodeView(path)
