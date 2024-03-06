@@ -11,8 +11,13 @@ app = {
         taskBarIcon = "S",
 
         settingsFilePath = "/usr/bin/PowerManager/settings.lua",
-        settingsTable = {},
+        inputHeight = 2,
+        submitButtonHeight = 3,
         submitButtonFunction = function() app.writeSettingsToFile(app.config.settingsTable) end
+    },
+
+    values = {
+        settingsTable = {},
     },
 
     readSettingsFromFile = function()
@@ -48,22 +53,17 @@ app = {
         end
     end,
 
-    createSettingsTable = function(layout, settings, descriptions)
+    createSettingsButtonsFromTable = function(layout, settings, descriptions)
         descriptions = descriptions or {}
-        for idx, v in ipairs(settings) do
-            if type(v) == "table" then
-                local col = layout:addColumn(GUI.SIZE_POLICY_RELATIVE, 1)
-                col:addChild(GUI.text(1, 1, 0x000000, v.identifier))
-                app.createSettingsTable(col, v.contents)
-            else
-                local button = layout:addChild(GUI.input(
-                    1, 1, layout.width, 2, 
-                    0xEEEEEE, 0x555555, 0x999999, 0xFFFFFF, 0x2D2D2D, 
-                    v, descriptions[idx]))
-                button.onInputFinished = function()
-                    v = button.text
+        for idx, entry in ipairs(settings) do
+            if type(entry) == "table" then
+                local col = layout:addChild(GUI.layout(1, 1, layout.width, 3, 1, 1))
+                col:setDirection(1, 1, GUI.DIRECTION_HORIZONTAL)
+                col:addChild(GUI.text(1, 1, 0x000000, entry.identifier))
+                for idx, setting in ipairs(entry.contents) do
+                    col:addChild(GUI.text(1, 1, setting.value, setting.identifier))
                 end
-            end
+            else end
         end
     end,
 
@@ -82,13 +82,13 @@ app = {
         windowObject.title.backgroundColor = app.config.backgroundColor
         windowObject.taskBarIcon.text = app.config.taskBarIcon
         local layout = windowObject:addChild(GUI.layout(1, 2, windowObject.width, windowObject.height, 1, 1))
-        app.createSettingsTable(layout, app.config.settingsTable)
+        app.createSettingsButtonsFromTable(layout, app.config.settingsTable)
         local submitButton = layout:addChild(GUI.button(
             1, 1, 
             app.config.size[1], 
-            3, 
+            app.config.submitButtonHeight, 
             0xFFFFFF, 0x555555, 0x880000, 0xFFFFFF, 
-            "Submit values"))
+            "Submit values to PowerManager/settings.lua"))
         submitButton.animated = false
         submitButton.onTouch = app.config.submitButtonFunction
         return windowObject

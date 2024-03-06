@@ -1,7 +1,7 @@
 --Requirements must be met. all other things can be used from main application
 local GUI = require("GUI")
 
-app = {
+local app = {
     --Global application config
     --extend as you wish.
     config = {

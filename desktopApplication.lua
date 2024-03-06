@@ -51,10 +51,10 @@ function systemButtons(application)
                     --FIXME: There has to be a right way of doing it.
                     print("Moving git tool")
                     os.execute("cp /usr/bin/PowerManager/git-tool.lua /home/git.lua")
-                    --print("Removing old files...")
+                    print("Removing old files...")
                     --powerman -*u*pdater -*u*ninstall
-                    --os.execute("powerman -u -u")
-                    --print("Done removing. Going to bootstrap...")
+                    os.execute("powerman -u -u")
+                    print("Done removing. Going to bootstrap...")
                     os.execute("/home/git.lua")
                     print("Going back to GUI")
                     os.sleep(0.5)

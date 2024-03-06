@@ -1,7 +1,7 @@
 --Requirements must be met. all other things can be used from main application
 local GUI = require("GUI")
 
-app = {
+local app = {
     --Global application config
     --extend as you wish.
     config = {
@@ -13,6 +13,10 @@ app = {
         title = "Application",
         taskBarIcon = "A",
         runTaskDelay = 5
+    },
+    --Store app values here.
+    values = {
+
     },
 
     --function that is called when application is being started.

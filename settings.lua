@@ -4,25 +4,29 @@ Settings = {
     desktopApplication = {
         identifier = "Desktop colors",
         contents = {
-            backgroundColor = 0x000000,
-            titleBarColor = 0x0000BB,
-            systemButtonColor = 0xBBBBBB,
-            taskBarColor = 0xBBBBBB
-        },
-        contentDescriptions = {
-            backgroundColorText = "Background",
-            titleBarColorText = "Title bars",
-            systemButtonColorText = "System Buttons",
-            taskBarColorText = "Taskbar",
+            backgroundColor = {
+                value = 0x000000,
+                identifier = "Background"},
+            titleBarColor = {
+                value = 0x0000BB,
+                identifier = "Title bars"},
+            systemButtonColor = {
+                value = 0xBBBBBB,
+                identifier = "System buttons"},
+            taskBarColor = {
+                value = 0xBBBBBB,
+                identifier = "Taskbar"},
         }
     },
     settingsApplication = {
         identifier = "Settings App",
         contents = {
-            
-        },
-        contentDescriptions = {
-
+            backgroundColor = {
+                value = 0x000000,
+                identifier = "Background"},
+            titleBarColor = {
+                value = 0x0000BB,
+                identifier = "Title bar"},
         }
     }
 }

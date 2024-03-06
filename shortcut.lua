@@ -7,6 +7,7 @@ local helpText = "This sophisticated toolset comes packed with a few features: \
                  "powerman              - no args: starts the GUI\n"..
                  "   '' -h              - this help text\n" .. 
                  "   '' -legacy         - Legacy application\n"..
+                 "   '' -gui            - Legacy GUI\n"..
                  "   '' -u              - starts the git-tool\n"..
                  "   '' -exe [filename] - executes the given file in the Application folder\n"..
                  "   '' -arb [command]  - executes an arbitrary function that is yet to be defined"
