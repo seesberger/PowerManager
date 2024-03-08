@@ -1,26 +1,29 @@
 --Requirements must be met. all other things can be used from main application
 local GUI = require("GUI")
+local unicode = require("unicode")
 
 app = {
     --Global application config
     --extend as you wish.
     config = {
         position = {},
-        size = {70, 40},
+        size = {120, 40},
         backgroundColor = 0xFFFFFF,
         titleColor = 0x00FF00,
-        title = "Launcher",
-        taskBarIcon = "L",
+        title = "Editor",
+        taskBarIcon = "E",
 
-        inputDescription = "Looking in /usr/bin/PowerManager/applications",
-        filesystemDescription = "Input filename and enter or click desired File in List",
+        filesystemDescription = "Select File to edit",
         inputDefaultText = "",
-        inputPlaceholder = "Filename.lua",
+        inputPlaceholder = "",
         inputBackgroundColor = 0xBBBBBB,
         inputBackgroundFocusedColor = 0xFFFFFF,
         inputTextColor = 0x000000,
         inputHeight = 35,
-        inputWidht = 66
+        inputWidht = 116,
+
+        codeViewWidth = 116,
+        codeViewHeight = 35
     },
 
     --function that is called when application is being started.
@@ -39,24 +42,8 @@ app = {
         windowObject.taskBarIcon.text = app.config.taskBarIcon
         --add a layout container to adaptively add content or remove it and let the content be hardcoded.
         local layout = windowObject:addChild(GUI.layout(1, 2, windowObject.width, windowObject.height, 1, 1))
-        --[[layout:addChild(GUI.text(1, 1, app.config.inputTextColor, app.config.inputDescription))
-        local input = layout:addChild(GUI.input(
-            1, 1, 
-            app.config.inputWidht, 
-            app.config.inputHeight,
-            app.config.inputBackgroundColor, 
-            app.config.inputTextColor, 
-            app.config.inputTextColor, 
-            app.config.inputBackgroundFocusedColor, 
-            app.config.inputTextColor, 
-            app.config.inputDefaultText, 
-            app.config.inputPlaceholder))
-        input.historyEnabled = true
-        input.onInputFinished = function()
-            LaunchApplication(application, "/usr/PowerManager/"..input.text)
-        end]]
 
-        layout:addChild(GUI.text(1, 1, app.config.inputTextColor, app.config.inputDescription))
+        local description = layout:addChild(GUI.text(1, 1, app.config.inputTextColor, app.config.filesystemDescription))
         local filesystem = layout:addChild(GUI.filesystemTree(1, 1, 
             app.config.inputWidht, 
             app.config.inputHeight, 
@@ -70,13 +57,12 @@ app = {
             0xAAAAAA, 
             0xBBBBBB, 
             0x444444, 
-            GUI.IO_MODE_FILE, 
-            GUI.IO_MODE_FILE))
+            GUI.IO_MODE_BOTH, 
+            GUI.IO_MODE_BOTH))
         filesystem.workPath = "/"
         filesystem:updateFileList()
         filesystem.onItemSelected = function(path)
-            --GUI.alert(path)
-            LaunchApplication(application, path)
+            os.execute("edit "..path)
         end
         --return the object of the window content.
         return windowObject
