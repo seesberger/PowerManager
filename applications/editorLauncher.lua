@@ -62,11 +62,12 @@ app = {
         filesystem.workPath = "/"
         filesystem:updateFileList()
         filesystem.onItemSelected = function(path)
+            application:removeChildren()
             application:addChild(GUI.panel(1, 1, application.width, application.height, backgroundColor))
             application:stop()
             os.execute("edit "..path)
-            application:draw(true)
-            application:start()
+            os.execute("powerman")
+            os.exit()
         end
         --return the object of the window content.
         return windowObject
