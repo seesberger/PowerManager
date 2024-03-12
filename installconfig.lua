@@ -31,7 +31,8 @@ Config = {
             "applications/fickDichMeter.lua",
             "applications/settingsApplication.lua",
             "applications/launchApplications.lua",
-            "applications/fileReader.lua"
+            "applications/fileReader.lua",
+            "applications/editorLauncher.lua"
         }
     }
 }

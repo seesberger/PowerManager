@@ -70,8 +70,8 @@ app = {
             0xAAAAAA, 
             0xBBBBBB, 
             0x444444, 
-            GUI.IO_MODE_FILE, 
-            GUI.IO_MODE_FILE))
+            GUI.IO_MODE_BOTH, 
+            GUI.IO_MODE_BOTH))
         filesystem.workPath = "/"
         filesystem:updateFileList()
         filesystem.onItemSelected = function(path)
